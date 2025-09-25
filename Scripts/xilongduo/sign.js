@@ -2,7 +2,7 @@
 /**
  * 喜隆多小程序签到脚本
  * 
- * 更新时间: 2024-10-24 10:00
+ * 更新时间: 2024-10-25 10:00
  * 脚本兼容: QuantumultX、Loon、Surge
  * 使用 Peng-YM OpenAPI 实现跨平台兼容
  * 使用 BoxJs 管理隐私数据
@@ -82,7 +82,7 @@ async function signIn() {
         };
         
         $.log("开始发送签到请求");
-        const response = await $.post(options);
+        const response = await $.http.post(options);
         
         if (response && response.body) {
             $.log(`签到请求成功，状态码: ${response.statusCode}`);
