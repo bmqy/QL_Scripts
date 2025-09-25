@@ -2,7 +2,7 @@
 /**
  * 喜隆多小程序签到脚本
  * 
- * 更新时间: 2025-09-25 14:07
+ * 更新时间: 2025-09-25 14:14
  * 脚本兼容: QuantumultX、Loon、Surge
  * 使用 Peng-YM OpenAPI 实现跨平台兼容
  * 使用 BoxJs 管理隐私数据
@@ -256,11 +256,17 @@ function GetParameter() {
 }
 
 // 根据环境决定是执行签到还是获取参数
-if (typeof $request !== 'undefined') {
-    // 请求环境：执行参数获取
+$.log(`环境检测: $request存在=${typeof $request !== 'undefined'}`);
+$.log(`环境检测: $loon存在=${typeof $loon !== 'undefined'} (Loon环境)`);
+$.log(`环境检测: $task存在=${typeof $task !== 'undefined'} (QuantumultX环境)`);
+$.log(`环境检测: $httpClient存在=${typeof $httpClient !== 'undefined'} (Surge环境)`);
+
+// 优先判断是否为请求拦截环境
+if (typeof $request !== 'undefined' || typeof $response !== 'undefined') {
+    $.log("进入请求拦截环境，执行参数获取功能");
     GetParameter();
 } else {
-    // 脚本环境：执行签到流程
+    $.log("进入脚本执行环境，执行签到功能");
     signIn();
 }
 
