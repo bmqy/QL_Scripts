@@ -2,7 +2,7 @@
 /**
  * 喜隆多小程序签到脚本
  * 
- * 更新时间: 2025-09-25 13:56
+ * 更新时间: 2025-09-25 14:07
  * 脚本兼容: QuantumultX、Loon、Surge
  * 使用 Peng-YM OpenAPI 实现跨平台兼容
  * 使用 BoxJs 管理隐私数据
@@ -14,7 +14,7 @@
  * - 通过BoxJs管理隐私数据
  */
 
-// 初始化 OpenAPI
+// 初始化 OpenAPI，启用BoxJs支持
 const $ = new API("XiLongDuo", true);
 
 // 执行签到
@@ -127,8 +127,11 @@ function GetParameter() {
                 if (body.Header && body.Header.Token) {
                     const currentToken = $.read("token");
                     if (currentToken !== body.Header.Token) {
-                        $.write(body.Header.Token, "token");
+                        // 同时保存到Loon和BoxJs
                         $.log(`成功保存token(请求体-Header.Token): ${body.Header.Token.substring(0, 10)}...`);
+                        $.write(body.Header.Token, "token");
+                        // 使用BoxJs命名空间保存
+                        $.setdata(body.Header.Token, "boxjs://xilongduo/token");
                         $.notify('喜隆多小程序', '参数更新', '成功保存token');
                         tokenFound = true;
                     } else {
@@ -140,8 +143,11 @@ function GetParameter() {
                 if (body.MallID) {
                     const currentMallID = $.read("mallID");
                     if (currentMallID !== body.MallID.toString()) {
-                        $.write(body.MallID.toString(), "mallID");
+                        // 同时保存到Loon和BoxJs
                         $.log(`成功保存mallID: ${body.MallID}`);
+                        $.write(body.MallID.toString(), "mallID");
+                        // 使用BoxJs命名空间保存
+                        $.setdata(body.MallID.toString(), "boxjs://xilongduo/mallID");
                         $.notify('喜隆多小程序', '参数更新', `成功保存mallID: ${body.MallID}`);
                         mallIDFound = true;
                     } else {
@@ -168,15 +174,21 @@ function GetParameter() {
             if (headers.Authorization) {
                 const token = headers.Authorization.replace(/^Bearer\s+/i, '');
                 if (token && $.read("token") !== token) {
-                    $.write(token, "token");
+                    // 同时保存到Loon和BoxJs
                     $.log(`成功保存token(请求头-Authorization): ${token.substring(0, 10)}...`);
+                    $.write(token, "token");
+                    // 使用BoxJs命名空间保存
+                    $.setdata(token, "boxjs://xilongduo/token");
                     $.notify('喜隆多小程序', '参数更新', '成功保存token');
                     tokenFound = true;
                 }
             } else if (headers.token) {
                 if ($.read("token") !== headers.token) {
-                    $.write(headers.token, "token");
+                    // 同时保存到Loon和BoxJs
                     $.log(`成功保存token(请求头-token): ${headers.token.substring(0, 10)}...`);
+                    $.write(headers.token, "token");
+                    // 使用BoxJs命名空间保存
+                    $.setdata(headers.token, "boxjs://xilongduo/token");
                     $.notify('喜隆多小程序', '参数更新', '成功保存token');
                     tokenFound = true;
                 }
@@ -190,8 +202,11 @@ function GetParameter() {
                 $.log(`响应体解析结果: ${JSON.stringify(resBody)}`);
                 // 检查响应中的token
                 if (!tokenFound && resBody.Header && resBody.Header.Token && $.read("token") !== resBody.Header.Token) {
-                    $.write(resBody.Header.Token, "token");
+                    // 同时保存到Loon和BoxJs
                     $.log(`成功保存token(响应体-Header.Token): ${resBody.Header.Token.substring(0, 10)}...`);
+                    $.write(resBody.Header.Token, "token");
+                    // 使用BoxJs命名空间保存
+                    $.setdata(resBody.Header.Token, "boxjs://xilongduo/token");
                     $.notify('喜隆多小程序', '参数更新', '成功保存token');
                     tokenFound = true;
                 }
@@ -200,8 +215,11 @@ function GetParameter() {
                     const possibleTokenFields = ['token', 'Token', 'access_token', 'AccessToken'];
                     for (const field of possibleTokenFields) {
                         if (resBody[field] && $.read("token") !== resBody[field]) {
-                            $.write(resBody[field], "token");
+                            // 同时保存到Loon和BoxJs
                             $.log(`成功保存token(响应体-${field}): ${resBody[field].substring(0, 10)}...`);
+                            $.write(resBody[field], "token");
+                            // 使用BoxJs命名空间保存
+                            $.setdata(resBody[field], "boxjs://xilongduo/token");
                             $.notify('喜隆多小程序', '参数更新', '成功保存token');
                             tokenFound = true;
                             break;
@@ -210,8 +228,11 @@ function GetParameter() {
                 }
                 // 检查响应中的mallID
                 if (!mallIDFound && resBody.MallID && $.read("mallID") !== resBody.MallID.toString()) {
-                    $.write(resBody.MallID.toString(), "mallID");
+                    // 同时保存到Loon和BoxJs
                     $.log(`成功保存mallID(响应体): ${resBody.MallID}`);
+                    $.write(resBody.MallID.toString(), "mallID");
+                    // 使用BoxJs命名空间保存
+                    $.setdata(resBody.MallID.toString(), "boxjs://xilongduo/mallID");
                     mallIDFound = true;
                 }
             } catch (e) {
