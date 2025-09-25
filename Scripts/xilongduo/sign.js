@@ -97,6 +97,7 @@ async function signIn() {
 function GetParameter() {
     try {
         $.log("进入参数获取模式");
+        let tokenFound = false;
         
         // 1. 从请求体中获取token
         if ($request.body) {
@@ -105,36 +106,78 @@ function GetParameter() {
                 
                 // 检查并保存token
                 if (body.Header && body.Header.Token && $.read("token") !== body.Header.Token) {
-                    const writeResult = $.write(body.Header.Token, "token");
-                    if (writeResult) {
-                        $.log("成功保存token");
-                        $.notify('喜隆多小程序', '参数更新', '成功保存token');
-                    } else {
-                        $.error("保存token失败");
-                    }
+                    $.write(body.Header.Token, "token");
+                    $.log("成功保存token(请求体-Header.Token)");
+                    $.notify('喜隆多小程序', '参数更新', '成功保存token');
+                    tokenFound = true;
                 }
                 
                 // 检查并保存mallID（如果有）
                 if (body.MallID && $.read("mallID") !== body.MallID.toString()) {
-                    const writeResult = $.write(body.MallID.toString(), "mallID");
-                    if (writeResult) {
-                        $.log("成功保存mallID");
-                        $.notify('喜隆多小程序', '参数更新', '成功保存mallID');
-                    }
+                    $.write(body.MallID.toString(), "mallID");
+                    $.log("成功保存mallID");
+                    $.notify('喜隆多小程序', '参数更新', '成功保存mallID');
                 }
             } catch (e) {
                 $.error(`解析请求体失败: ${e}`);
             }
         }
         
-        // 2. 从响应体中获取数据（备用）
+        // 2. 从请求头中获取token（备用路径）
+        if (!$response && !tokenFound && $request.headers) {
+            const headers = $request.headers;
+            // 检查常见的token头
+            if (headers.Authorization) {
+                const token = headers.Authorization.replace(/^Bearer\s+/i, '');
+                if (token && $.read("token") !== token) {
+                    $.write(token, "token");
+                    $.log("成功保存token(请求头-Authorization)");
+                    $.notify('喜隆多小程序', '参数更新', '成功保存token');
+                    tokenFound = true;
+                }
+            } else if (headers.token) {
+                if ($.read("token") !== headers.token) {
+                    $.write(headers.token, "token");
+                    $.log("成功保存token(请求头-token)");
+                    $.notify('喜隆多小程序', '参数更新', '成功保存token');
+                    tokenFound = true;
+                }
+            }
+        }
+        
+        // 3. 从响应体中获取数据
         if ($response && $response.body) {
             try {
                 const resBody = JSON.parse($response.body);
-                // 可以根据实际API响应结构调整
+                // 检查响应中的token
+                if (!tokenFound && resBody.Header && resBody.Header.Token && $.read("token") !== resBody.Header.Token) {
+                    $.write(resBody.Header.Token, "token");
+                    $.log("成功保存token(响应体-Header.Token)");
+                    $.notify('喜隆多小程序', '参数更新', '成功保存token');
+                    tokenFound = true;
+                }
+                // 检查响应中的其他可能的token字段
+                if (!tokenFound) {
+                    const possibleTokenFields = ['token', 'Token', 'access_token', 'AccessToken'];
+                    for (const field of possibleTokenFields) {
+                        if (resBody[field] && $.read("token") !== resBody[field]) {
+                            $.write(resBody[field], "token");
+                            $.log(`成功保存token(响应体-${field})`);
+                            $.notify('喜隆多小程序', '参数更新', '成功保存token');
+                            tokenFound = true;
+                            break;
+                        }
+                    }
+                }
             } catch (e) {
                 $.error(`解析响应体失败: ${e}`);
             }
+        }
+        
+        if (tokenFound) {
+            $.log("参数获取成功");
+        } else {
+            $.log("未在请求中找到可用的token");
         }
     } catch (error) {
         $.error(`参数获取出错: ${error}`);
