@@ -2,7 +2,7 @@
 /**
  * 喜隆多小程序签到脚本
  * 
- * 更新时间: 2025-09-25 16:54
+ * 更新时间: 2025-09-25 17:04
  * 脚本兼容: QuantumultX、Loon、Surge
  * 使用 Peng-YM OpenAPI 实现跨平台兼容
  * 使用 BoxJs 管理隐私数据
@@ -14,7 +14,7 @@
  * - 通过BoxJs管理隐私数据
  */
 
-// 初始化 OpenAPI，启用BoxJs支持
+// 初始化 OpenAPI，启用BoxJs支持 - debug模式为true以启用详细日志输出
 const $ = new API("XiLongDuo", true);
 
 // 执行签到
@@ -108,143 +108,198 @@ async function signIn() {
     }
     }
 
-// 参数获取函数 - 自动捕获并保存token和mallID（优化Loon环境兼容性）
+// 参数获取函数 - 自动捕获并保存token和mallID（优化Loon环境兼容性，支持多存储路径）
 function GetParameter() {
     try {
+        // 强制使用console.log来确保在Loon环境中日志可见
+        console.log("[喜隆多小程序] 进入参数获取模式 - Loon环境特殊处理");
         $.log("进入参数获取模式");
         let tokenFound = false;
         let mallIDFound = false;
         
         // 记录环境信息，便于调试
+        console.log(`[喜隆多小程序] 环境信息 - Loon: ${typeof $loon !== 'undefined'}`);
+        console.log(`[喜隆多小程序] 环境信息 - $request存在: ${typeof $request !== 'undefined'}`);
+        console.log(`[喜隆多小程序] 环境信息 - $response存在: ${typeof $response !== 'undefined'}`);
+        console.log(`[喜隆多小程序] 环境信息 - $done存在: ${typeof $done !== 'undefined'}`);
+        
         $.log(`环境信息 - Loon: ${typeof $loon !== 'undefined'}`);
         $.log(`环境信息 - $request存在: ${typeof $request !== 'undefined'}`);
         $.log(`环境信息 - $response存在: ${typeof $response !== 'undefined'}`);
         
         // 安全地获取请求URL（防止在某些环境中未定义导致脚本崩溃）
         if (typeof $request !== 'undefined' && $request.url) {
+            console.log(`[喜隆多小程序] 当前请求URL: ${$request.url}`);
             $.log(`当前请求URL: ${$request.url}`);
+        } else {
+            console.log("[喜隆多小程序] $request或$request.url未定义");
+            $.log("$request或$request.url未定义");
         }
         
         // 1. 从请求体中获取token和mallID - 增强对Loon环境的兼容性
         if (typeof $request !== 'undefined' && $request.body) {
             try {
+                console.log(`[喜隆多小程序] 请求体长度: ${$request.body.length} 字符`);
                 const body = JSON.parse($request.body);
+                console.log(`[喜隆多小程序] 请求体解析结果: ${JSON.stringify(body).substring(0, 200)}...`);
                 $.log(`请求体解析结果: ${JSON.stringify(body).substring(0, 200)}...`);
                 
                 // 检查并保存token
                 if (body.Header && body.Header.Token) {
                     const currentToken = $.read("token");
+                    console.log(`[喜隆多小程序] 发现Header.Token，当前存储的token: ${currentToken ? '存在' : '不存在'}`);
                     if (currentToken !== body.Header.Token) {
                         // 同时保存到Loon和BoxJs
+                        console.log(`[喜隆多小程序] 成功保存token(请求体-Header.Token): ${body.Header.Token.substring(0, 10)}...`);
                         $.log(`成功保存token(请求体-Header.Token): ${body.Header.Token.substring(0, 10)}...`);
                         $.write(body.Header.Token, "token");
                         // 使用BoxJs命名空间保存
                         $.setdata(body.Header.Token, "boxjs://xilongduo/token");
-                        $.notify('喜隆多小程序', '参数更新', '成功保存token');
+                        // 尝试使用两种方式发送通知，确保至少有一个能工作
+                        try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
                         tokenFound = true;
                     } else {
+                        console.log("[喜隆多小程序] token未变化，无需更新");
                         $.log("token未变化，无需更新");
                     }
+                } else {
+                    console.log("[喜隆多小程序] 请求体中未找到Header.Token");
                 }
                 
                 // 检查并保存mallID
                 if (body.MallID) {
                     const currentMallID = $.read("mallID");
+                    console.log(`[喜隆多小程序] 发现MallID，当前存储的mallID: ${currentMallID ? '存在' : '不存在'}`);
                     if (currentMallID !== body.MallID.toString()) {
                         // 同时保存到Loon和BoxJs
+                        console.log(`[喜隆多小程序] 成功保存mallID: ${body.MallID}`);
                         $.log(`成功保存mallID: ${body.MallID}`);
                         $.write(body.MallID.toString(), "mallID");
                         // 使用BoxJs命名空间保存
                         $.setdata(body.MallID.toString(), "boxjs://xilongduo/mallID");
-                        $.notify('喜隆多小程序', '参数更新', `成功保存mallID: ${body.MallID}`);
+                        // 尝试使用两种方式发送通知，确保至少有一个能工作
+                        try { $.notify('喜隆多小程序', '参数更新', `成功保存mallID: ${body.MallID}`); } catch (e) {}
                         mallIDFound = true;
                     } else {
+                        console.log("[喜隆多小程序] mallID未变化，无需更新");
                         $.log("mallID未变化，无需更新");
                     }
+                } else {
+                    console.log("[喜隆多小程序] 请求体中未找到MallID");
                 }
                 
                 // 保存systemInfo用于签到请求
                 if (body.Header && body.Header.systemInfo) {
                     $.write(JSON.stringify(body.Header.systemInfo), "systemInfo");
+                    console.log("[喜隆多小程序] 成功保存systemInfo");
                     $.log("成功保存systemInfo");
                 }
             } catch (e) {
+                console.error(`[喜隆多小程序] 解析请求体失败: ${e}`);
                 $.error(`解析请求体失败: ${e}`);
                 // 在Loon中安全地记录请求体前100个字符
                 try {
                     if ($request.body && $request.body.length > 0) {
-                        $.log(`请求体内容: ${$request.body.substring(0, 100)}...`);
+                        const bodyPreview = $request.body.substring(0, 100);
+                        console.log(`[喜隆多小程序] 请求体内容: ${bodyPreview}...`);
+                        $.log(`请求体内容: ${bodyPreview}...`);
                     }
                 } catch (logError) {
+                    console.error(`[喜隆多小程序] 记录请求体失败: ${logError}`);
                     $.error(`记录请求体失败: ${logError}`);
                 }
             }
+        } else {
+            console.log("[喜隆多小程序] $request或$request.body未定义，无法从请求体获取参数");
+            $.log("$request或$request.body未定义，无法从请求体获取参数");
         }
         
         // 2. 从请求头中获取token（备用路径）- 优化Loon中的请求头处理
-        if (typeof $request !== 'undefined' && $request.headers && !tokenFound) {
+        if (!tokenFound && typeof $request !== 'undefined' && $request.headers) {
             const headers = $request.headers;
+            console.log("[喜隆多小程序] 开始从请求头获取token");
             // 安全地记录请求头，避免过大
             try {
                 const headersStr = JSON.stringify(headers);
+                console.log(`[喜隆多小程序] 请求头: ${headersStr.substring(0, 200)}...`);
                 $.log(`请求头: ${headersStr.substring(0, 200)}...`);
             } catch (logError) {
+                console.error(`[喜隆多小程序] 记录请求头失败: ${logError}`);
                 $.error(`记录请求头失败: ${logError}`);
             }
             
             // 检查常见的token头
             if (headers.Authorization) {
                 const token = headers.Authorization.replace(/^Bearer\s+/i, '');
+                console.log(`[喜隆多小程序] 发现Authorization头，长度: ${token.length} 字符`);
                 if (token && $.read("token") !== token) {
                     // 同时保存到Loon和BoxJs
+                    console.log(`[喜隆多小程序] 成功保存token(请求头-Authorization): ${token.substring(0, 10)}...`);
                     $.log(`成功保存token(请求头-Authorization): ${token.substring(0, 10)}...`);
                     $.write(token, "token");
                     // 使用BoxJs命名空间保存
                     $.setdata(token, "boxjs://xilongduo/token");
-                    $.notify('喜隆多小程序', '参数更新', '成功保存token');
+                    // 尝试使用两种方式发送通知，确保至少有一个能工作
+                    try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
                     tokenFound = true;
                 }
             } else if (headers.token) {
+                console.log(`[喜隆多小程序] 发现token头，长度: ${headers.token.length} 字符`);
                 if ($.read("token") !== headers.token) {
                     // 同时保存到Loon和BoxJs
+                    console.log(`[喜隆多小程序] 成功保存token(请求头-token): ${headers.token.substring(0, 10)}...`);
                     $.log(`成功保存token(请求头-token): ${headers.token.substring(0, 10)}...`);
                     $.write(headers.token, "token");
                     // 使用BoxJs命名空间保存
                     $.setdata(headers.token, "boxjs://xilongduo/token");
-                    $.notify('喜隆多小程序', '参数更新', '成功保存token');
+                    // 尝试使用两种方式发送通知，确保至少有一个能工作
+                    try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
                     tokenFound = true;
                 }
+            } else {
+                console.log("[喜隆多小程序] 请求头中未找到Authorization或token字段");
             }
         }
         
         // 3. 从响应体中获取数据 - 优化Loon中的响应处理
-        if (typeof $response !== 'undefined' && $response && $response.body) {
+        if (!tokenFound && typeof $response !== 'undefined' && $response && $response.body) {
+            console.log("[喜隆多小程序] 开始从响应体获取数据");
             try {
                 const resBody = JSON.parse($response.body);
+                console.log(`[喜隆多小程序] 响应体解析结果: ${JSON.stringify(resBody).substring(0, 200)}...`);
                 $.log(`响应体解析结果: ${JSON.stringify(resBody).substring(0, 200)}...`);
                 
                 // 检查响应中的token
-                if (!tokenFound && resBody.Header && resBody.Header.Token && $.read("token") !== resBody.Header.Token) {
+                if (resBody.Header && resBody.Header.Token && $.read("token") !== resBody.Header.Token) {
+                    console.log(`[喜隆多小程序] 发现响应体Header.Token，长度: ${resBody.Header.Token.length} 字符`);
                     // 同时保存到Loon和BoxJs
+                    console.log(`[喜隆多小程序] 成功保存token(响应体-Header.Token): ${resBody.Header.Token.substring(0, 10)}...`);
                     $.log(`成功保存token(响应体-Header.Token): ${resBody.Header.Token.substring(0, 10)}...`);
                     $.write(resBody.Header.Token, "token");
                     // 使用BoxJs命名空间保存
                     $.setdata(resBody.Header.Token, "boxjs://xilongduo/token");
-                    $.notify('喜隆多小程序', '参数更新', '成功保存token');
+                    // 尝试使用两种方式发送通知，确保至少有一个能工作
+                    try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
                     tokenFound = true;
+                } else {
+                    console.log("[喜隆多小程序] 响应体中未找到Header.Token或token未变化");
                 }
                 
                 // 检查响应中的其他可能的token字段
                 if (!tokenFound) {
                     const possibleTokenFields = ['token', 'Token', 'access_token', 'AccessToken'];
+                    console.log(`[喜隆多小程序] 开始检查其他可能的token字段: ${possibleTokenFields.join(', ')}`);
                     for (const field of possibleTokenFields) {
                         if (resBody[field] && $.read("token") !== resBody[field]) {
+                            console.log(`[喜隆多小程序] 在字段${field}中发现token，长度: ${resBody[field].length} 字符`);
                             // 同时保存到Loon和BoxJs
+                            console.log(`[喜隆多小程序] 成功保存token(响应体-${field}): ${resBody[field].substring(0, 10)}...`);
                             $.log(`成功保存token(响应体-${field}): ${resBody[field].substring(0, 10)}...`);
                             $.write(resBody[field], "token");
                             // 使用BoxJs命名空间保存
                             $.setdata(resBody[field], "boxjs://xilongduo/token");
-                            $.notify('喜隆多小程序', '参数更新', '成功保存token');
+                            // 尝试使用两种方式发送通知，确保至少有一个能工作
+                            try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
                             tokenFound = true;
                             break;
                         }
@@ -253,7 +308,9 @@ function GetParameter() {
                 
                 // 检查响应中的mallID
                 if (!mallIDFound && resBody.MallID && $.read("mallID") !== resBody.MallID.toString()) {
+                    console.log(`[喜隆多小程序] 发现响应体MallID: ${resBody.MallID}`);
                     // 同时保存到Loon和BoxJs
+                    console.log(`[喜隆多小程序] 成功保存mallID(响应体): ${resBody.MallID}`);
                     $.log(`成功保存mallID(响应体): ${resBody.MallID}`);
                     $.write(resBody.MallID.toString(), "mallID");
                     // 使用BoxJs命名空间保存
@@ -261,43 +318,94 @@ function GetParameter() {
                     mallIDFound = true;
                 }
             } catch (e) {
+                console.error(`[喜隆多小程序] 解析响应体失败: ${e}`);
                 $.error(`解析响应体失败: ${e}`);
                 if ($response && $response.body) {
                     try {
-                        $.log(`响应体内容: ${$response.body.substring(0, 100)}...`);
+                        const resPreview = $response.body.substring(0, 100);
+                        console.log(`[喜隆多小程序] 响应体内容: ${resPreview}...`);
+                        $.log(`响应体内容: ${resPreview}...`);
                     } catch (logError) {
+                        console.error(`[喜隆多小程序] 记录响应体失败: ${logError}`);
                         $.error(`记录响应体失败: ${logError}`);
                     }
                 }
             }
         }
         
+        // 4. 额外的Loon特殊处理：尝试直接从请求对象的其他可能位置获取
+        if (typeof $loon !== 'undefined' && !tokenFound) {
+            console.log("[喜隆多小程序] Loon环境特殊处理：尝试从其他可能位置获取参数");
+            // 检查是否有其他可能包含参数的对象
+            try {
+                // 尝试访问$request对象的其他属性
+                const requestProps = Object.keys($request || {});
+                console.log(`[喜隆多小程序] $request对象属性: ${requestProps.join(', ')}`);
+                
+                // 检查是否有其他可能包含token的字段
+                if (typeof $request === 'object') {
+                    for (const prop in $request) {
+                        if (prop.toLowerCase().includes('token') && typeof $request[prop] === 'string' && $request[prop].length > 10) {
+                            console.log(`[喜隆多小程序] 在$request.${prop}中发现可能的token，长度: ${$request[prop].length} 字符`);
+                            if ($.read("token") !== $request[prop]) {
+                                $.write($request[prop], "token");
+                                $.setdata($request[prop], "boxjs://xilongduo/token");
+                                try { $.notify('喜隆多小程序', '参数更新', `从$request.${prop}成功保存token`); } catch (e) {}
+                                tokenFound = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error(`[喜隆多小程序] Loon环境特殊处理失败: ${e}`);
+            }
+        }
+        
         // 添加参数获取总结，帮助调试
+        const existingToken = $.read("token");
+        const existingMallID = $.read("mallID");
+        console.log(`[喜隆多小程序] 参数获取总结 - token: ${tokenFound ? '已更新' : '未变化'}，mallID: ${mallIDFound ? '已更新' : '未变化'}`);
+        console.log(`[喜隆多小程序] 当前存储的token: ${existingToken ? '存在(' + existingToken.length + '字符)' : '不存在'}`);
+        console.log(`[喜隆多小程序] 当前存储的mallID: ${existingMallID ? '存在(' + existingMallID + ')' : '不存在'}`);
+        
         if (tokenFound || mallIDFound) {
             $.log(`参数获取成功，token: ${tokenFound ? '已更新' : '未变化'}，mallID: ${mallIDFound ? '已更新' : '未变化'}`);
         } else {
             $.log("未在请求中找到可用的token或mallID需要更新");
-            // 在Loon环境中，如果没有获取到参数，尝试读取现有参数并记录
-            const existingToken = $.read("token");
-            const existingMallID = $.read("mallID");
             $.log(`当前存储的token: ${existingToken ? '存在' : '不存在'}`);
             $.log(`当前存储的mallID: ${existingMallID ? '存在' : '不存在'}`);
+            
+            // 如果没有获取到参数但已有存储的参数，发送通知确认
+            if (existingToken || existingMallID) {
+                try {
+                    $.notify('喜隆多小程序', '参数状态', `token${existingToken ? '已存在' : '未设置'}，mallID${existingMallID ? '已存在' : '未设置'}`);
+                } catch (e) {}
+            }
         }
     } catch (error) {
+        console.error(`[喜隆多小程序] 参数获取出错: ${error}`);
+        console.error(`[喜隆多小程序] 错误栈: ${error.stack || '无'}`);
         $.error(`参数获取出错: ${error}`);
         // 在Loon中安全地处理全局异常
         try {
             $.notify('喜隆多小程序', '参数获取失败', `错误: ${error.message || error}`);
         } catch (notifyError) {
+            console.error(`[喜隆多小程序] 发送通知失败: ${notifyError}`);
             $.error(`发送通知失败: ${notifyError}`);
         }
     } finally {
         // 根据Loon文档要求，确保在脚本结束时调用$.done()
         try {
-            $.done();
+            console.log("[喜隆多小程序] 即将调用$.done()结束参数获取脚本");
+            if (typeof $done !== 'undefined') {
+                $done();
+            } else {
+                console.log("[喜隆多小程序] $done未定义，使用替代方式结束脚本");
+            }
         } catch (doneError) {
             // 避免在某些环境中$.done()未定义导致的崩溃
-            console.log(`调用$.done()失败: ${doneError}`);
+            console.error(`[喜隆多小程序] 调用$.done()失败: ${doneError}`);
         }
     }
 }
