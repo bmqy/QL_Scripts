@@ -2,7 +2,7 @@
 /**
  * 喜隆多小程序签到脚本
  * 
- * 更新时间: 2024-10-25 10:00
+ * 更新时间: 2025-09-25 13:56
  * 脚本兼容: QuantumultX、Loon、Surge
  * 使用 Peng-YM OpenAPI 实现跨平台兼容
  * 使用 BoxJs 管理隐私数据
@@ -161,7 +161,7 @@ function GetParameter() {
         }
         
         // 2. 从请求头中获取token（备用路径）
-        if (!$response && !tokenFound && $request.headers) {
+        if (typeof $response === 'undefined' && !tokenFound && $request.headers) {
             const headers = $request.headers;
             $.log(`请求头: ${JSON.stringify(headers)}`);
             // 检查常见的token头
@@ -184,7 +184,7 @@ function GetParameter() {
         }
         
         // 3. 从响应体中获取数据
-        if ($response && $response.body) {
+        if (typeof $response !== 'undefined' && $response && $response.body) {
             try {
                 const resBody = JSON.parse($response.body);
                 $.log(`响应体解析结果: ${JSON.stringify(resBody)}`);
@@ -216,7 +216,9 @@ function GetParameter() {
                 }
             } catch (e) {
                 $.error(`解析响应体失败: ${e}`);
-                $.log(`响应体内容: ${$response.body.substring(0, 100)}...`);
+                if ($response && $response.body) {
+                    $.log(`响应体内容: ${$response.body.substring(0, 100)}...`);
+                }
             }
         }
         
