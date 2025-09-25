@@ -2,7 +2,7 @@
 /**
  * 喜隆多小程序签到脚本
  * 
- * 更新时间: 2025-09-25 14:19
+ * 更新时间: 2025-09-25 16:49
  * 脚本兼容: QuantumultX、Loon、Surge
  * 使用 Peng-YM OpenAPI 实现跨平台兼容
  * 使用 BoxJs 管理隐私数据
@@ -108,20 +108,28 @@ async function signIn() {
     }
     }
 
-// 参数获取函数 - 自动捕获并保存token和mallID
+// 参数获取函数 - 自动捕获并保存token和mallID（优化Loon环境兼容性）
 function GetParameter() {
     try {
         $.log("进入参数获取模式");
         let tokenFound = false;
         let mallIDFound = false;
         
-        $.log(`当前请求URL: ${$request.url}`);
+        // 记录环境信息，便于调试
+        $.log(`环境信息 - Loon: ${typeof $loon !== 'undefined'}`);
+        $.log(`环境信息 - $request存在: ${typeof $request !== 'undefined'}`);
+        $.log(`环境信息 - $response存在: ${typeof $response !== 'undefined'}`);
         
-        // 1. 从请求体中获取token和mallID - 根据用户提供的格式优化
-        if ($request.body) {
+        // 安全地获取请求URL（防止在某些环境中未定义导致脚本崩溃）
+        if (typeof $request !== 'undefined' && $request.url) {
+            $.log(`当前请求URL: ${$request.url}`);
+        }
+        
+        // 1. 从请求体中获取token和mallID - 增强对Loon环境的兼容性
+        if (typeof $request !== 'undefined' && $request.body) {
             try {
                 const body = JSON.parse($request.body);
-                $.log(`请求体解析结果: ${JSON.stringify(body)}`);
+                $.log(`请求体解析结果: ${JSON.stringify(body).substring(0, 200)}...`);
                 
                 // 检查并保存token
                 if (body.Header && body.Header.Token) {
@@ -162,14 +170,28 @@ function GetParameter() {
                 }
             } catch (e) {
                 $.error(`解析请求体失败: ${e}`);
-                $.log(`请求体内容: ${$request.body.substring(0, 100)}...`);
+                // 在Loon中安全地记录请求体前100个字符
+                try {
+                    if ($request.body && $request.body.length > 0) {
+                        $.log(`请求体内容: ${$request.body.substring(0, 100)}...`);
+                    }
+                } catch (logError) {
+                    $.error(`记录请求体失败: ${logError}`);
+                }
             }
         }
         
-        // 2. 从请求头中获取token（备用路径）
-        if (typeof $response === 'undefined' && !tokenFound && $request.headers) {
+        // 2. 从请求头中获取token（备用路径）- 优化Loon中的请求头处理
+        if (typeof $request !== 'undefined' && $request.headers && !tokenFound) {
             const headers = $request.headers;
-            $.log(`请求头: ${JSON.stringify(headers)}`);
+            // 安全地记录请求头，避免过大
+            try {
+                const headersStr = JSON.stringify(headers);
+                $.log(`请求头: ${headersStr.substring(0, 200)}...`);
+            } catch (logError) {
+                $.error(`记录请求头失败: ${logError}`);
+            }
+            
             // 检查常见的token头
             if (headers.Authorization) {
                 const token = headers.Authorization.replace(/^Bearer\s+/i, '');
@@ -195,11 +217,12 @@ function GetParameter() {
             }
         }
         
-        // 3. 从响应体中获取数据
+        // 3. 从响应体中获取数据 - 优化Loon中的响应处理
         if (typeof $response !== 'undefined' && $response && $response.body) {
             try {
                 const resBody = JSON.parse($response.body);
-                $.log(`响应体解析结果: ${JSON.stringify(resBody)}`);
+                $.log(`响应体解析结果: ${JSON.stringify(resBody).substring(0, 200)}...`);
+                
                 // 检查响应中的token
                 if (!tokenFound && resBody.Header && resBody.Header.Token && $.read("token") !== resBody.Header.Token) {
                     // 同时保存到Loon和BoxJs
@@ -210,6 +233,7 @@ function GetParameter() {
                     $.notify('喜隆多小程序', '参数更新', '成功保存token');
                     tokenFound = true;
                 }
+                
                 // 检查响应中的其他可能的token字段
                 if (!tokenFound) {
                     const possibleTokenFields = ['token', 'Token', 'access_token', 'AccessToken'];
@@ -226,6 +250,7 @@ function GetParameter() {
                         }
                     }
                 }
+                
                 // 检查响应中的mallID
                 if (!mallIDFound && resBody.MallID && $.read("mallID") !== resBody.MallID.toString()) {
                     // 同时保存到Loon和BoxJs
@@ -238,20 +263,42 @@ function GetParameter() {
             } catch (e) {
                 $.error(`解析响应体失败: ${e}`);
                 if ($response && $response.body) {
-                    $.log(`响应体内容: ${$response.body.substring(0, 100)}...`);
+                    try {
+                        $.log(`响应体内容: ${$response.body.substring(0, 100)}...`);
+                    } catch (logError) {
+                        $.error(`记录响应体失败: ${logError}`);
+                    }
                 }
             }
         }
         
+        // 添加参数获取总结，帮助调试
         if (tokenFound || mallIDFound) {
             $.log(`参数获取成功，token: ${tokenFound ? '已更新' : '未变化'}，mallID: ${mallIDFound ? '已更新' : '未变化'}`);
         } else {
             $.log("未在请求中找到可用的token或mallID需要更新");
+            // 在Loon环境中，如果没有获取到参数，尝试读取现有参数并记录
+            const existingToken = $.read("token");
+            const existingMallID = $.read("mallID");
+            $.log(`当前存储的token: ${existingToken ? '存在' : '不存在'}`);
+            $.log(`当前存储的mallID: ${existingMallID ? '存在' : '不存在'}`);
         }
     } catch (error) {
         $.error(`参数获取出错: ${error}`);
+        // 在Loon中安全地处理全局异常
+        try {
+            $.notify('喜隆多小程序', '参数获取失败', `错误: ${error.message || error}`);
+        } catch (notifyError) {
+            $.error(`发送通知失败: ${notifyError}`);
+        }
     } finally {
-        $.done();
+        // 根据Loon文档要求，确保在脚本结束时调用$.done()
+        try {
+            $.done();
+        } catch (doneError) {
+            // 避免在某些环境中$.done()未定义导致的崩溃
+            console.log(`调用$.done()失败: ${doneError}`);
+        }
     }
 }
 
