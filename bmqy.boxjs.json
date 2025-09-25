@@ -1,0 +1,275 @@
+{
+	"id": "bmqy.app.sub",
+	"name": "bmqy应用订阅",
+	"author": "@bmqy",
+	"icon": "https://avatars2.githubusercontent.com/u/7834895",
+	"repo": "https://github.com/bmqy/QuantumultX",
+	"apps": [
+		{
+			"id": "xjmnq",
+			"name": "小鸡模拟器存档续期脚本",
+			"keys": ["CookieXJMNQRenew"],
+			"settings": [
+				{
+					"id": "CookieXJMNQRenew",
+					"name": "小鸡模拟器cookie",
+					"val": "",
+					"placeholder": "例如，JSESSIONID=E9AC33DF92C86F62EEE56UIDFDED78D78DFE)",
+					"type": "textarea",
+					"autoGrow": true,
+					"rows": 2,
+					"desc": ""
+				}
+			],
+			"author": "@bmqy",
+			"repo": "https://github.com/bmqy/QuantumultX/tree/master/Scripts/xjmnq",
+			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/xjmnq/renew.js",
+			"icons": [
+				"https://imgsrc.baidu.com/forum/pic/item/0bd162d9f2d3572cbd11c6e48613632762d0c313.jpg",
+				"https://imgsrc.baidu.com/forum/pic/item/0bd162d9f2d3572cbd11c6e48613632762d0c313.jpg"
+			]
+		},
+		{
+			"id": "tianjie",
+			"name": "天街微信小程序签到脚本",
+			"keys": [
+				"tianjieSign-StoreId",
+				"tianjieSign-token",
+				"tianjieSign-userkey",
+				"tianjieSign-ApiKey",
+				"tianjieSign-projectId"
+			],
+			"settings": [
+				{
+					"id": "tianjieSign-StoreId",
+					"name": "StoreId",
+					"val": "",
+					"placeholder": "StoreId",
+					"type": "text",
+					"autoGrow": true,
+					"rows": 2,
+					"desc": ""
+				},
+				{
+					"id": "tianjieSign-token",
+					"name": "token",
+					"val": "",
+					"placeholder": "token",
+					"type": "text",
+					"autoGrow": true,
+					"rows": 2,
+					"desc": ""
+				},
+				{
+					"id": "tianjieSign-userkey",
+					"name": "userkey",
+					"val": "",
+					"placeholder": "userkey",
+					"type": "text",
+					"autoGrow": true,
+					"rows": 2,
+					"desc": ""
+				},
+				{
+					"id": "tianjieSign-ApiKey",
+					"name": "ApiKey",
+					"val": "",
+					"placeholder": "ApiKey",
+					"type": "text",
+					"autoGrow": true,
+					"rows": 2,
+					"desc": ""
+				},
+				{
+					"id": "tianjieSign-projectId",
+					"name": "projectId",
+					"val": "",
+					"placeholder": "projectId",
+					"type": "text",
+					"autoGrow": true,
+					"rows": 2,
+					"desc": ""
+				}
+			],
+			"author": "@bmqy",
+			"repo": "https://github.com/bmqy/QuantumultX/tree/master/Scripts/tianjie",
+			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/xjmnq/renew.js",
+			"icons": [
+				"http://house.china.com.cn/chongqing/UserFiles/20140725/10021433.jpg",
+				"http://house.china.com.cn/chongqing/UserFiles/20140725/10021433.jpg"
+			]
+		},
+		{
+			"id": "xilongduo",
+			"name": "喜隆多小程序签到脚本",
+			"keys": ["token", "mallID"],
+			"settings": [
+				{
+					"id": "token",
+					"name": "token",
+					"val": "",
+					"placeholder": "token",
+					"type": "textarea",
+					"autoGrow": true,
+					"rows": 2,
+					"desc": "从喜隆多小程序获取的token"
+				},
+				{
+					"id": "mallID",
+					"name": "mallID",
+					"val": "",
+					"placeholder": "mallID",
+					"type": "text",
+					"autoGrow": false,
+					"rows": 1,
+					"desc": "从喜隆多小程序获取的mallID"
+				}
+			],
+			"author": "@bmqy",
+			"repo": "https://github.com/bmqy/QuantumultX/tree/master/Scripts/xilongduo",
+			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/xilongduo/sign.js",
+			"icons": [
+				"https://img.alicdn.com/tfs/TB1vQo5aV39YK4jSZPcXXbTqpXa-256-256.png",
+				"https://img.alicdn.com/tfs/TB1vQo5aV39YK4jSZPcXXbTqpXa-256-256.png"
+			]
+		},
+		{
+			"id": "zhognjun",
+			"name": "中骏小程序签到脚本",
+			"keys": ["token", "customerId", "shopCode"],
+			"settings": [
+				{
+					"id": "token",
+					"name": "token",
+					"val": "",
+					"placeholder": "token",
+					"type": "textarea",
+					"autoGrow": true,
+					"rows": 2,
+					"desc": "从BoxJs获取的token"
+				},
+				{
+					"id": "customerId",
+					"name": "customerId",
+					"val": "",
+					"placeholder": "customerId",
+					"type": "text",
+					"autoGrow": false,
+					"rows": 1,
+					"desc": "用户ID"
+				},
+				{
+					"id": "shopCode",
+					"name": "shopCode",
+					"val": "",
+					"placeholder": "shopCode",
+					"type": "text",
+					"autoGrow": false,
+					"rows": 1,
+					"desc": "店铺代码"
+				}
+			],
+			"author": "@bmqy",
+			"repo": "https://github.com/bmqy/QuantumultX/tree/master/Scripts/zhognjun",
+			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/zhognjun/sign.js",
+			"icons": [
+				"https://img.alicdn.com/tfs/TB1vQo5aV39YK4jSZPcXXbTqpXa-256-256.png",
+				"https://img.alicdn.com/tfs/TB1vQo5aV39YK4jSZPcXXbTqpXa-256-256.png"
+			]
+		},
+		{
+			"id": "KunLunHuiXiang",
+			"name": "昆仑惠享燃气",
+			"descs_html": [
+				"点此直达【<a href='https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/kunlunhuixiang/ranqi.js'>脚本地址</a>】",
+				"昆仑惠享燃气查询脚本",
+				"请填写token、用户代码等信息"
+			],
+			"keys": [
+				"token",
+				"signature",
+				"userCode",
+				"cid"
+			],
+			"settings": [
+				{
+					"id": "token",
+					"name": "token",
+					"val": "",
+					"placeholder": "填写token",
+					"type": "textarea",
+					"autoGrow": true,
+					"rows": 3,
+					"desc": "从抓包中获取的token"
+				},
+				{
+					"id": "signature",
+					"name": "signature",
+					"val": "",
+					"placeholder": "填写signature",
+					"type": "text",
+					"autoGrow": false,
+					"rows": 1,
+					"desc": "从抓包中获取的签名"
+				},
+				{
+					"id": "userCode",
+					"name": "用户代码",
+					"val": "xxx",
+					"placeholder": "填写用户代码",
+					"type": "text",
+					"autoGrow": false,
+					"rows": 1,
+					"desc": "用户识别代码"
+				},
+				{
+					"id": "cid",
+					"name": "CID",
+					"val": "xxx",
+					"placeholder": "填写CID",
+					"type": "text",
+					"autoGrow": false,
+					"rows": 1,
+					"desc": "客户ID"
+				}
+			],
+			"author": "@bmqy",
+			"repo": "https://github.com/bmqy/QuantumultX/master/Scripts/kunlunhuixiang",
+			"icons": [
+				"https://img.alicdn.com/tfs/TB1vQo5aV39YK4jSZPcXXbTqpXa-256-256.png",
+				"https://img.alicdn.com/tfs/TB1vQo5aV39YK4jSZPcXXbTqpXa-256-256.png"
+			],
+			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/kunlunhuixiang/ranqi.js"
+		},
+		{
+			"id": "smmo-helper",
+			"name": "SMMO助手",
+			"descs_html": [
+				"点此直达【<a href=\"https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/simple-mmo/smmo_helper.js\">脚本地址</a>】",
+				"Simple-mmo游戏助手"
+			],
+			"keys": [
+				"@SMMOHelper.levelStep"
+			],
+			"settings": [
+				{
+					"id": "@SMMOHelper.levelStep",
+					"name": "等级",
+					"val": "",
+					"placeholder": "level，默认：100",
+					"type": "text",
+					"autoGrow": true,
+					"rows": 1,
+					"desc": "请填写每隔多少级更新一次Bio"
+				}
+			],
+			"author": "@bmqy",
+			"repo": "https://github.com/bmqy/QuantumultX/master/Scripts/simple-mmo",
+			"icons": [
+				"https://web.simple-mmo.com/img/dragon-head-trans.png",
+				"https://web.simple-mmo.com/img/dragon-head-trans.png"
+			],
+			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/simple-mmo/smmo_helper.js"
+		}
+	]
+}

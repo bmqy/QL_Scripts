@@ -1,0 +1,33 @@
+# SMMOHelper
+# simple-mmo.com助手脚本
+# 创建：2023年06月07日
+# 更新：2023年06月09日
+# 目前功能：
+; 自动更新玩家bio，记录等级升级日志
+; 金币捐赠，默认：2000
+; 工作次数，默认：10
+# 食用方法:
+; 1、添加quanx配置片段，并启用
+; 2、进入游戏，手动提交更新bio(不需要修改直接提交保存即可)
+; 3、通知中可见“token已更新”，即为脚本启用成功
+; 4、正常游戏(旅行、打怪、任务等)即可自动记录升级时间至bio中
+hostname=api.simple-mmo.com, web.simple-mmo.com, simple-mmo.com
+
+# bio token
+https:\/\/(web\.)?simple\-mmo\.com\/user\/character\/\d+\/bio\/submit url script-request-body https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/simple-mmo/smmo_helper.js
+# api_token
+https:\/\/api\.simple\-mmo\.com\/api\/main url script-request-body https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/simple-mmo/smmo_helper.js
+# travel
+https:\/\/api\.simple\-mmo\.com\/api\/action\/travel\/\d+ url script-response-body https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/simple-mmo/smmo_helper.js
+# quest
+https:\/\/api\.simple\-mmo\.com\/api\/quest\/\d+\/[a-z0-9]+ url script-response-body https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/simple-mmo/smmo_helper.js
+# attack
+https:\/\/api\.simple\-mmo\.com\/api\/npcs\/attack\/\d+\/[a-z0-9]+ url script-response-body https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/simple-mmo/smmo_helper.js
+# crafting
+https:\/\/simple\-mmo\.com\/api\/crafting\/material\/gather\/\d+ url script-response-body https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/simple-mmo/smmo_helper.js
+
+# Gold Donation Default: 2000
+https:\/\/(web\.)?simple\-mmo\.com\/orphanage(\?new_page_refresh\=true)? url response-body (title: 'Gold Donation',[\r\n\s]+html: 'Make a donation to the poor orphanage to help the less fortunate\.',[\r\n\s]+)(input: 'number',) response-body $1input: 'number',inputValue: 2000,
+
+# How long do you want to work? Default: 10
+https:\/\/(web\.)?simple\-mmo\.com\/jobs\/view/\d+\?new_page_refresh\=true url response-body inputValue: 1, response-body inputValue: 10,

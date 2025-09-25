@@ -1,0 +1,10 @@
+{
+  "name": "bmqy's task gallery",
+  "description": "QuantumultX's task gallery",
+  "task": [
+    "11 10 * * * https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/tianjie/sign.js, tag=天街, enabled=false",
+    "0 7 1,15 * * https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/xjmnq/renew.js, tag=小鸡模拟器存档续期, img-url=https://imgsrc.baidu.com/forum/pic/item/0bd162d9f2d3572cbd11c6e48613632762d0c313.jpg, enabled=true",
+    "0 0-23/6 * * * https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/qiniu/cost.js, tag=七牛云实时消费金额, img-url=http://tvax2.sinaimg.cn/crop.455.455.1137.1137.1024/9e0444ddly8fnqcc0bp58j21kw1kwq54.jpg, enabled=true",
+"30 7-22 * * * https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/appstore/appraven.js, tag=AppRaven监控, enabled=false"
+  ]
+}

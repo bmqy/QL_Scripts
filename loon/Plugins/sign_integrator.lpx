@@ -1,0 +1,30 @@
+#!name = 签到脚本集成器
+#!desc = 集成多个平台的签到脚本
+#!icon = https://cdn-icons-png.flaticon.com/512/3670/3670158.png
+#!openUrl = https://github.com/bmqy/QL_Scripts
+#!author = bmqy
+#!homepage = https://github.com/bmqy/QL_Scripts
+#!loon_version = 3.2.1
+#!date = 2024-10-21
+#!tag = 签到
+#!debug = false
+
+[Script]
+# 中骏小程序签到脚本
+cron "0 8 * * *" script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/main/Scripts/zhognjun/sign.js, tag=中骏签到, enabled=true
+
+[MITM]
+# 签到相关域名
+hostname = api.sce-icm.com
+
+[Notification]
+# 签到成功通知
+success-title = 签到成功
+success-content = 中骏小程序签到已完成
+
+error-title = 签到失败
+error-content = 中骏小程序签到执行失败，请检查日志
+
+[Environment]
+# 日志级别：0=静默,1=基本,2=详细
+LOG_LEVEL = 1

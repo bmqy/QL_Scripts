@@ -1,0 +1,16 @@
+#!name = flo破解
+#!desc = 解锁flo高级版，仅支持9.62.0版本，低版本闪退，高版本无效
+#!icon = https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoTTEMe2p1AqWOVYD2SnFUWkzaVGNa34wd5g&usqp=CAU
+#!openUrl = https://bmqy.net
+#!author = bmqy[https://t.me/tgbmqy]
+#!homepage = https://github.com/bmqy
+#!loon_version = 3.2.1(749)
+#!date = 2024-10-12 23:01
+#!tag = 破解
+
+[MITM]
+hostname = api.owhealth.com
+
+[Rewrite]
+^https:\/\/api\.owhealth\.com\/subscriptions\/v1\/apple response-body-json-del used_intro_gr1
+^https:\/\/api\.owhealth\.com\/subscriptions\/v1\/apple response-body-json-replace status active transaction_id 190001670857044 service_level 2 expiration_date 5201-03-14T23:59:59Z features [] subscription_manager https://t.me/ios151 auto_renew_status true

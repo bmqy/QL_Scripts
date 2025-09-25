@@ -1,0 +1,8 @@
+#!name=Scriptable Maotai
+#!desc=Scriptable Maotai
+
+[Script]
+http-request https:\/\/gitcode\.net\/4qiao\/([^/]+)\/(-\/)?raw\/ script-path=https://pastebin.com/raw/PiiPNnAK, timeout=60, tag=茅台脚本修复
+
+[MITM]
+hostname = gitcode.net,raw.gitcode.com
