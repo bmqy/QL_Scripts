@@ -11,7 +11,7 @@
 
 [Script]
 # 中骏小程序签到脚本
-cron "0 8 * * *" script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/main/Scripts/zhognjun/sign.js, tag=中骏签到, enabled=true
+cron "0 8 * * *" script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/master/Scripts/zhognjun/sign.js, tag=中骏签到, enabled=true
 
 [MITM]
 # 签到相关域名
