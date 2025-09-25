@@ -22,7 +22,7 @@ async function signIn() {
     try {
         // 从 BoxJs 读取配置
         const token = $.read("token");
-        const mallID = $.read("mallID") || "12690";
+        const mallID = $.read("mallID");
         
         // 检查配置
         if (!token) {
