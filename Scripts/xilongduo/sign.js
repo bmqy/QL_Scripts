@@ -2,7 +2,7 @@
 /**
  * 喜隆多小程序签到脚本
  * 
- * 更新时间: 2024-10-23 10:00
+ * 更新时间: 2024-10-24 10:00
  * 脚本兼容: QuantumultX、Loon、Surge
  * 使用 Peng-YM OpenAPI 实现跨平台兼容
  * 使用 BoxJs 管理隐私数据
@@ -17,21 +17,19 @@
 // 初始化 OpenAPI
 const $ = new API("XiLongDuo", true);
 
-// 从 BoxJs 读取配置
-const token = $.read("token");
-const mallID = $.read("mallID") || "12690";
-
-// 检查配置
-if (!token) {
-    $.notify("喜隆多小程序", "配置错误", "请在 BoxJs 中添加 token 配置");
-    $.error("未找到 token 配置");
-    $.done();
-    return;
-}
-
 // 执行签到
 async function signIn() {
     try {
+        // 从 BoxJs 读取配置
+        const token = $.read("token");
+        const mallID = $.read("mallID") || "12690";
+        
+        // 检查配置
+        if (!token) {
+            $.notify("喜隆多小程序", "配置错误", "请在 BoxJs 中添加 token 配置");
+            $.error("未找到 token 配置");
+            return;        }
+        
         const url = "https://m.mallcoo.cn/api/user/User/CheckinV2";
         
         // 构建请求头
@@ -108,7 +106,7 @@ async function signIn() {
     } finally {
         $.done();
     }
-}
+    }
 
 // 参数获取函数 - 自动捕获并保存token和mallID
 function GetParameter() {
