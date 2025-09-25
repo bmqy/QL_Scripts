@@ -23,7 +23,7 @@ http-request https://c2-openapi.longfor.com/riyuehu-miniapp-service-prod/ryh/sig
 cron "0 8 * * *" script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/xilongduo/sign.js, tag=喜隆多签到, enabled=true
 
 # 喜隆多小程序参数获取脚本
-http-request https://m.mallcoo.cn/api/user/User/* script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/xilongduo/sign.js, tag=喜隆多参数获取, enabled=true, requires-body=true
+http-request https://m.mallcoo.cn/api/user/User/CheckinV2 script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/xilongduo/sign.js, tag=喜隆多参数获取, enabled=true, requires-body=true
 
 [MITM]
 # 签到相关域名

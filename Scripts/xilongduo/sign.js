@@ -2,7 +2,7 @@
 /**
  * 喜隆多小程序签到脚本
  * 
- * 更新时间: 2025-09-25 17:04
+ * 更新时间: 2025-09-25 17:17
  * 脚本兼容: QuantumultX、Loon、Surge
  * 使用 Peng-YM OpenAPI 实现跨平台兼容
  * 使用 BoxJs 管理隐私数据
@@ -153,8 +153,8 @@ function GetParameter() {
                         console.log(`[喜隆多小程序] 成功保存token(请求体-Header.Token): ${body.Header.Token.substring(0, 10)}...`);
                         $.log(`成功保存token(请求体-Header.Token): ${body.Header.Token.substring(0, 10)}...`);
                         $.write(body.Header.Token, "token");
-                        // 使用BoxJs命名空间保存
-                        $.setdata(body.Header.Token, "boxjs://xilongduo/token");
+                        // 使用统一的BoxJs命名空间保存
+                        $.setdata(body.Header.Token, "boxjs://XiLongDuo/token");
                         // 尝试使用两种方式发送通知，确保至少有一个能工作
                         try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
                         tokenFound = true;
@@ -166,26 +166,34 @@ function GetParameter() {
                     console.log("[喜隆多小程序] 请求体中未找到Header.Token");
                 }
                 
-                // 检查并保存mallID
+                // 检查并保存mallID - 处理大小写兼容问题
+                let mallIdValue = null;
                 if (body.MallID) {
+                    mallIdValue = body.MallID;
+                } else if (body.MallId) {
+                    mallIdValue = body.MallId;  // 修复大小写问题，匹配请求体中的MallId
+                    console.log(`[喜隆多小程序] 发现MallId(注意大小写): ${mallIdValue}`);
+                }
+                
+                if (mallIdValue !== null) {
                     const currentMallID = $.read("mallID");
-                    console.log(`[喜隆多小程序] 发现MallID，当前存储的mallID: ${currentMallID ? '存在' : '不存在'}`);
-                    if (currentMallID !== body.MallID.toString()) {
+                    console.log(`[喜隆多小程序] 发现mallID，当前存储的mallID: ${currentMallID ? '存在' : '不存在'}`);
+                    if (currentMallID !== mallIdValue.toString()) {
                         // 同时保存到Loon和BoxJs
-                        console.log(`[喜隆多小程序] 成功保存mallID: ${body.MallID}`);
-                        $.log(`成功保存mallID: ${body.MallID}`);
-                        $.write(body.MallID.toString(), "mallID");
-                        // 使用BoxJs命名空间保存
-                        $.setdata(body.MallID.toString(), "boxjs://xilongduo/mallID");
+                        console.log(`[喜隆多小程序] 成功保存mallID: ${mallIdValue}`);
+                        $.log(`成功保存mallID: ${mallIdValue}`);
+                        $.write(mallIdValue.toString(), "mallID");
+                        // 使用统一的BoxJs命名空间保存
+                         $.setdata(mallIdValue.toString(), "boxjs://XiLongDuo/mallID");
                         // 尝试使用两种方式发送通知，确保至少有一个能工作
-                        try { $.notify('喜隆多小程序', '参数更新', `成功保存mallID: ${body.MallID}`); } catch (e) {}
+                        try { $.notify('喜隆多小程序', '参数更新', `成功保存mallID: ${mallIdValue}`); } catch (e) {}
                         mallIDFound = true;
                     } else {
                         console.log("[喜隆多小程序] mallID未变化，无需更新");
                         $.log("mallID未变化，无需更新");
                     }
                 } else {
-                    console.log("[喜隆多小程序] 请求体中未找到MallID");
+                    console.log("[喜隆多小程序] 请求体中未找到MallID或MallId");
                 }
                 
                 // 保存systemInfo用于签到请求
@@ -237,8 +245,8 @@ function GetParameter() {
                     console.log(`[喜隆多小程序] 成功保存token(请求头-Authorization): ${token.substring(0, 10)}...`);
                     $.log(`成功保存token(请求头-Authorization): ${token.substring(0, 10)}...`);
                     $.write(token, "token");
-                    // 使用BoxJs命名空间保存
-                    $.setdata(token, "boxjs://xilongduo/token");
+                    // 使用统一的BoxJs命名空间保存
+                         $.setdata(token, "boxjs://XiLongDuo/token");
                     // 尝试使用两种方式发送通知，确保至少有一个能工作
                     try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
                     tokenFound = true;
@@ -250,8 +258,8 @@ function GetParameter() {
                     console.log(`[喜隆多小程序] 成功保存token(请求头-token): ${headers.token.substring(0, 10)}...`);
                     $.log(`成功保存token(请求头-token): ${headers.token.substring(0, 10)}...`);
                     $.write(headers.token, "token");
-                    // 使用BoxJs命名空间保存
-                    $.setdata(headers.token, "boxjs://xilongduo/token");
+                    // 使用统一的BoxJs命名空间保存
+                         $.setdata(headers.token, "boxjs://XiLongDuo/token");
                     // 尝试使用两种方式发送通知，确保至少有一个能工作
                     try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
                     tokenFound = true;
@@ -276,8 +284,8 @@ function GetParameter() {
                     console.log(`[喜隆多小程序] 成功保存token(响应体-Header.Token): ${resBody.Header.Token.substring(0, 10)}...`);
                     $.log(`成功保存token(响应体-Header.Token): ${resBody.Header.Token.substring(0, 10)}...`);
                     $.write(resBody.Header.Token, "token");
-                    // 使用BoxJs命名空间保存
-                    $.setdata(resBody.Header.Token, "boxjs://xilongduo/token");
+                    // 使用统一的BoxJs命名空间保存
+                         $.setdata(resBody.Header.Token, "boxjs://XiLongDuo/token");
                     // 尝试使用两种方式发送通知，确保至少有一个能工作
                     try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
                     tokenFound = true;
@@ -296,8 +304,8 @@ function GetParameter() {
                             console.log(`[喜隆多小程序] 成功保存token(响应体-${field}): ${resBody[field].substring(0, 10)}...`);
                             $.log(`成功保存token(响应体-${field}): ${resBody[field].substring(0, 10)}...`);
                             $.write(resBody[field], "token");
-                            // 使用BoxJs命名空间保存
-                            $.setdata(resBody[field], "boxjs://xilongduo/token");
+                            // 使用统一的BoxJs命名空间保存
+                             $.setdata(resBody[field], "boxjs://XiLongDuo/token");
                             // 尝试使用两种方式发送通知，确保至少有一个能工作
                             try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
                             tokenFound = true;
@@ -313,8 +321,8 @@ function GetParameter() {
                     console.log(`[喜隆多小程序] 成功保存mallID(响应体): ${resBody.MallID}`);
                     $.log(`成功保存mallID(响应体): ${resBody.MallID}`);
                     $.write(resBody.MallID.toString(), "mallID");
-                    // 使用BoxJs命名空间保存
-                    $.setdata(resBody.MallID.toString(), "boxjs://xilongduo/mallID");
+                    // 使用统一的BoxJs命名空间保存
+                     $.setdata(resBody.MallID.toString(), "boxjs://XiLongDuo/mallID");
                     mallIDFound = true;
                 }
             } catch (e) {
@@ -349,7 +357,8 @@ function GetParameter() {
                             console.log(`[喜隆多小程序] 在$request.${prop}中发现可能的token，长度: ${$request[prop].length} 字符`);
                             if ($.read("token") !== $request[prop]) {
                                 $.write($request[prop], "token");
-                                $.setdata($request[prop], "boxjs://xilongduo/token");
+                                // 使用统一的BoxJs命名空间保存
+                                 $.setdata($request[prop], "boxjs://XiLongDuo/token");
                                 try { $.notify('喜隆多小程序', '参数更新', `从$request.${prop}成功保存token`); } catch (e) {}
                                 tokenFound = true;
                                 break;
