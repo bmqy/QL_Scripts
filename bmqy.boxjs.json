@@ -100,9 +100,9 @@
 			]
 		},
 		{
-			"id": "XiLongDuo",
+			"id": "XiLongDuoSign",
 			"name": "喜隆多小程序签到脚本",
-			"keys": ["token", "mallID"],
+			"keys": ["XiLongDuo"],
 			"settings": [
 				{
 					"id": "token",
