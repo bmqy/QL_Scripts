@@ -8,17 +8,17 @@
 		{
 			"id": "xjmnq",
 			"name": "小鸡模拟器存档续期脚本",
-			"keys": ["CookieXJMNQRenew"],
+			"keys": ["@xjmnq.cookie"],
 			"settings": [
 				{
-					"id": "CookieXJMNQRenew",
+					"id": "@xjmnq.cookie",
 					"name": "小鸡模拟器cookie",
 					"val": "",
 					"placeholder": "例如，JSESSIONID=E9AC33DF92C86F62EEE56UIDFDED78D78DFE)",
 					"type": "textarea",
 					"autoGrow": true,
 					"rows": 2,
-					"desc": ""
+					"desc": "从小鸡模拟器获取的cookie"
 				}
 			],
 			"author": "@bmqy",
@@ -33,74 +33,74 @@
 			"id": "tianjie",
 			"name": "天街微信小程序签到脚本",
 			"keys": [
-				"tianjieSign-StoreId",
-				"tianjieSign-token",
-				"tianjieSign-userkey",
-				"tianjieSign-ApiKey",
-				"tianjieSign-projectId"
+				"@tianjie.StoreId",
+				"@tianjie.token",
+				"@tianjie.userkey",
+				"@tianjie.ApiKey",
+				"@tianjie.projectId"
 			],
 			"settings": [
 				{
-					"id": "tianjieSign-StoreId",
+					"id": "@tianjie.StoreId",
 					"name": "StoreId",
 					"val": "",
 					"placeholder": "StoreId",
 					"type": "text",
 					"autoGrow": true,
 					"rows": 2,
-					"desc": ""
+					"desc": "从天街小程序获取的StoreId"
 				},
 				{
-					"id": "tianjieSign-token",
+					"id": "@tianjie.token",
 					"name": "token",
 					"val": "",
 					"placeholder": "token",
 					"type": "text",
 					"autoGrow": true,
 					"rows": 2,
-					"desc": ""
+					"desc": "从天街小程序获取的token"
 				},
 				{
-					"id": "tianjieSign-userkey",
+					"id": "@tianjie.userkey",
 					"name": "userkey",
 					"val": "",
 					"placeholder": "userkey",
 					"type": "text",
 					"autoGrow": true,
 					"rows": 2,
-					"desc": ""
+					"desc": "从天街小程序获取的userkey"
 				},
 				{
-					"id": "tianjieSign-ApiKey",
+					"id": "@tianjie.ApiKey",
 					"name": "ApiKey",
 					"val": "",
 					"placeholder": "ApiKey",
 					"type": "text",
 					"autoGrow": true,
 					"rows": 2,
-					"desc": ""
+					"desc": "从天街小程序获取的ApiKey"
 				},
 				{
-					"id": "tianjieSign-projectId",
+					"id": "@tianjie.projectId",
 					"name": "projectId",
 					"val": "",
 					"placeholder": "projectId",
 					"type": "text",
 					"autoGrow": true,
 					"rows": 2,
-					"desc": ""
+					"desc": "从天街小程序获取的projectId"
 				}
 			],
 			"author": "@bmqy",
 			"repo": "https://github.com/bmqy/QuantumultX/tree/master/Scripts/tianjie",
-			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/xjmnq/renew.js",
+			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/tianjie/sign.js",
 			"icons": [
 				"http://house.china.com.cn/chongqing/UserFiles/20140725/10021433.jpg",
 				"http://house.china.com.cn/chongqing/UserFiles/20140725/10021433.jpg"
 			]
 		},
 		{
-			"id": "XiLongDuoSign",
+			"id": "xilongduo",
 			"name": "喜隆多小程序签到脚本",
 			"keys": ["@XiLongDuo.token", "@XiLongDuo.mallID"],
 			"settings": [
@@ -136,20 +136,20 @@
 		{
 			"id": "zhognjun",
 			"name": "中骏小程序签到脚本",
-			"keys": ["token", "customerId", "shopCode"],
+			"keys": ["@zhognjun.token", "@zhognjun.customerId", "@zhognjun.shopCode"],
 			"settings": [
 				{
-					"id": "token",
+					"id": "@zhognjun.token",
 					"name": "token",
 					"val": "",
 					"placeholder": "token",
 					"type": "textarea",
 					"autoGrow": true,
 					"rows": 2,
-					"desc": "从BoxJs获取的token"
+					"desc": "从中骏小程序获取的token"
 				},
 				{
-					"id": "customerId",
+					"id": "@zhognjun.customerId",
 					"name": "customerId",
 					"val": "",
 					"placeholder": "customerId",
@@ -159,7 +159,7 @@
 					"desc": "用户ID"
 				},
 				{
-					"id": "shopCode",
+					"id": "@zhognjun.shopCode",
 					"name": "shopCode",
 					"val": "",
 					"placeholder": "shopCode",
@@ -186,14 +186,14 @@
 				"请填写token、用户代码等信息"
 			],
 			"keys": [
-				"token",
-				"signature",
-				"userCode",
-				"cid"
+				"@KunLunHuiXiang.token",
+				"@KunLunHuiXiang.signature",
+				"@KunLunHuiXiang.userCode",
+				"@KunLunHuiXiang.cid"
 			],
 			"settings": [
 				{
-					"id": "token",
+					"id": "@KunLunHuiXiang.token",
 					"name": "token",
 					"val": "",
 					"placeholder": "填写token",
@@ -203,7 +203,7 @@
 					"desc": "从抓包中获取的token"
 				},
 				{
-					"id": "signature",
+					"id": "@KunLunHuiXiang.signature",
 					"name": "signature",
 					"val": "",
 					"placeholder": "填写signature",
@@ -213,7 +213,7 @@
 					"desc": "从抓包中获取的签名"
 				},
 				{
-					"id": "userCode",
+					"id": "@KunLunHuiXiang.userCode",
 					"name": "用户代码",
 					"val": "xxx",
 					"placeholder": "填写用户代码",
@@ -223,7 +223,7 @@
 					"desc": "用户识别代码"
 				},
 				{
-					"id": "cid",
+					"id": "@KunLunHuiXiang.cid",
 					"name": "CID",
 					"val": "xxx",
 					"placeholder": "填写CID",
@@ -271,5 +271,6 @@
 			],
 			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/simple-mmo/smmo_helper.js"
 		}
-	]
+	],
+	"updateTime": "2025-09-26 13:53"
 }
