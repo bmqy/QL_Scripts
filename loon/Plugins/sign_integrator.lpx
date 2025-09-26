@@ -16,9 +16,6 @@ cron "0 8 * * *" script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/d
 # 中骏小程序签到参数获取
 http-request https://api.sce-icm.com/api/v1/dig-mall/customer/sign/signNow script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/zhognjun/sign.js, tag=中骏签到参数获取, enabled=true, requires-body=true
 
-# 天街项目参数获取脚本
-http-request https://c2-openapi.longfor.com/riyuehu-miniapp-service-prod/ryh/sign/today/info/query script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/tianjie/sign.js, tag=天街项目参数获取, enabled=true, requires-body=true
-
 # 喜隆多小程序签到脚本
 cron "0 8 * * *" script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/xilongduo/sign.js, tag=喜隆多签到, enabled=true
 
