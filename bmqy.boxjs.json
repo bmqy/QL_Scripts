@@ -102,10 +102,10 @@
 		{
 			"id": "XiLongDuoSign",
 			"name": "喜隆多小程序签到脚本",
-			"keys": ["XiLongDuo"],
+			"keys": ["@XiLongDuo.token", "@XiLongDuo.mallID"],
 			"settings": [
 				{
-					"id": "token",
+					"id": "@XiLongDuo.token",
 					"name": "token",
 					"val": "",
 					"placeholder": "token",
@@ -115,7 +115,7 @@
 					"desc": "从喜隆多小程序获取的token"
 				},
 				{
-					"id": "mallID",
+					"id": "@XiLongDuo.mallID",
 					"name": "mallID",
 					"val": "",
 					"placeholder": "mallID",
