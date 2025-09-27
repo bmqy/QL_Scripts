@@ -97,7 +97,7 @@ async function signIn() {
         
         // 执行签到请求
         $.log("步骤3: 执行签到请求");
-        const response = await $.post(options);
+        const response = await $.http.post(options);
         
         if (response && response.body) {
             $.log(`签到请求成功，状态码: ${response.statusCode}`);
