@@ -1,0 +1,9 @@
+###[mitm]
+hostname = api.sce-icm.com, m.mallcoo.cn
+
+###[rewrite_remote]
+# 中骏小程序签到参数获取
+^https://api\.sce-icm\.com/api/v1/dig-mall/customer/sign/signNow url script-request-body https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/zhognjun/sign.js
+
+# 喜隆多小程序参数获取脚本
+^https://m\.mallcoo\.cn/api/user/User/CheckinV2 url script-request-body https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/xilongduo/sign.js

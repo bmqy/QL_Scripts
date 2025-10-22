@@ -1,7 +1,0 @@
-node_modules/
-dist/
-src/
-package.json
-package-lock.json
-tsconfig.json
-webpack.config.js
