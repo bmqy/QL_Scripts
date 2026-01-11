@@ -93,7 +93,7 @@ async function signIn() {
                 $.log(`签到成功: ${message}`);
                 $.notify('喜隆多小程序', '签到成功', message);
             } else {
-                const errorMsg = res.d.Msg || '未知错误';
+                const errorMsg = res.e || '未知错误';
                 $.error(`签到失败: ${errorMsg}`);
                 $.notify('喜隆多小程序', '签到失败', `错误: ${errorMsg}`);
             }
