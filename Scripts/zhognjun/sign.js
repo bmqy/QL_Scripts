@@ -244,16 +244,25 @@ $.log(`环境检测: $task存在=${typeof $task !== 'undefined'} (QuantumultX环
 $.log(`环境检测: $httpClient存在=${typeof $httpClient !== 'undefined'} (Surge环境)`);
 $.log(`环境检测: $done存在=${typeof $done !== 'undefined'}`);
 
-// 先直接执行签到功能
-$.log("脚本开始执行，直接运行签到功能");
-signIn();
+// 检查是否是签到请求
+function isSignRequest() {
+    try {
+        if (typeof $request !== 'undefined' && $request.url) {
+            return $request.url.includes('/customer/sign/signNow');
+        }
+        return false;
+    } catch (e) {
+        $.error(`检查请求失败: ${e}`);
+        return false;
+    }
+}
 
-// 检查是否是请求事件并且请求体中含有必要参数，如果是则执行获取参数方法
-function hasRequiredParamsInRequestBody() {
+// 检查请求体中是否包含签到所需的参数
+function hasSignParamsInRequest() {
     try {
         if (typeof $request !== 'undefined' && $request.body) {
             const body = JSON.parse($request.body);
-            return body.token || body.customerId || body.shopCode;
+            return body.customerId && body.shopCode;
         }
         return false;
     } catch (e) {
@@ -262,10 +271,19 @@ function hasRequiredParamsInRequestBody() {
     }
 }
 
-// 如果是请求事件且请求体中含有必要参数，执行参数获取方法
-if (typeof $request !== 'undefined' && hasRequiredParamsInRequestBody()) {
-    $.log("环境检测: 检测到请求事件且请求体包含必要参数，执行参数获取功能");
-    GetParameter();
+// 如果检测到签到请求，则先获取参数，然后结束
+if (isSignRequest()) {
+    $.log("环境检测: 检测到签到请求，自动捕获签到参数");
+    if (hasSignParamsInRequest()) {
+        GetParameter();
+    } else {
+        $.log("环境检测: 签到请求中未找到必要参数");
+        $done();
+    }
+} else {
+    // 定时任务或手动运行时，执行签到功能
+    $.log("脚本开始执行，运行签到功能");
+    signIn();
 }
 
 $.log(`环境检测: 当前环境状态日志结束`);
