@@ -1,11 +1,11 @@
-/**
+﻿/**
  * 中骏小程序签到脚本
  * 
- * 更新时间: 2025-09-26 15:21
+ * 更新时间: 2026-01-14
  * 脚本兼容: QuantumultX、Loon、Surge
- * 使用 Peng-YM OpenAPI 实现跨平台兼容
+ * 使用官方 Env.js 库实现跨平台兼容
  * 使用 BoxJs 管理隐私数据
- * https://github.com/Peng-YM/QuanX/tree/master/Tools/OpenAPI
+ * https://github.com/chavyleung/scripts
  * 
  * 功能说明：
  * - 自动完成中骏小程序每日签到
@@ -13,8 +13,8 @@
  * - 通过BoxJs管理隐私数据
  */
 
-// 初始化 OpenAPI，启用BoxJs支持 - debug模式为true以启用详细日志输出
-const $ = new API("ZhongJunSign", true);
+// 初始化Env，启用BoxJs 支持
+const $ = new Env("ZhongJunSign");
 
 // 配置信息
 const API_HOST = "api.sce-icm.com";
@@ -28,7 +28,7 @@ const url = `https://${API_HOST}/api/v1/dig-mall/customer/sign/signNow`;
 // 获取当前时间戳
 function getCurrentTimestamp() {
     const timestamp = Date.now().toString();
-    $.log(`生成时间戳: ${timestamp}`);
+    $.log(`获取时间戳：${timestamp}`);
     return timestamp;
 }
 
@@ -36,17 +36,17 @@ function getCurrentTimestamp() {
 async function getXHttpToken() {
     $.log("开始获取x-http-token");
     
-    // 从 BoxJs 读取token
+    // 从BoxJs 读取token
     let token = $.read(KEYS.TOKEN);
     
     if (token) {
-        $.log("从 BoxJs 获取到token");
+        $.log("从BoxJs 获取到token");
         return token;
     }
     
     // 如果本地没有，提示用户配置
-    $.error("BoxJs 中未找到token，请先配置");
-    $.notify('中骏小程序', '配置错误', '请在 BoxJs 中添加 token 配置');
+    $.logErr("BoxJs 中未找到token，请先配置");
+    $.notify('中骏小程序', '配置错误', '请在 BoxJs 中配置 token 参数');
     throw new Error("未配置token");
 }
 
@@ -55,19 +55,19 @@ async function signIn() {
     try {
         $.log("开始执行签到流程");
         
-        // 从 BoxJs 读取配置
+        // 从BoxJs 读取配置
         const customerId = $.read(KEYS.CUSTOMER_ID);
         const shopCode = $.read(KEYS.SHOP_CODE);
         
         // 检查必要的配置是否存在
         if (!customerId || !shopCode) {
-            $.notify('中骏小程序', '配置错误', '请在 BoxJs 中填写完整的 customerId 和 shopCode');
-            $.error("配置不完整：缺少 customerId 或 shopCode");
+            $.notify('中骏小程序', '配置错误', '请在 BoxJs 中完整配置 customerId 和 shopCode');
+            $.logErr("配置不完整：缺少 customerId 或 shopCode");
             return;
         }
         
         // 获取token
-        $.log("步骤1: 获取token");
+        $.log("步骤1：获取token");
         const token = await getXHttpToken();
         
         // 构建请求头和请求体
@@ -100,40 +100,40 @@ async function signIn() {
         };
         
         // 执行签到请求
-        $.log("步骤3: 执行签到请求");
+        $.log("步骤3：执行签到请求");
         const response = await $.http.post(options);
         
         if (response && response.body) {
-            $.log(`签到请求成功，状态码: ${response.statusCode}`);
+            $.log(`签到请求成功，状态码：${response.statusCode}`);
             const res = JSON.parse(response.body);
             
             if (res.code === 200) {
                 if (res.data.isSuccess) {
-                    let message = `+${res.data.signDailyPoint}，下次签到奖励：${res.data.nextAwardCount}，共签到：${res.data.totalSignCount}天`;
-                    $.log(`签到成功: ${message}`);
+                    let message = `+${res.data.signDailyPoint}。下次签到奖励：${res.data.nextAwardCount}。连续签到：${res.data.totalSignCount}天`;
+                    $.log(`签到成功：${message}`);
                     $.notify('中骏小程序', '签到成功', message);
                 } else {
                     const failReason = res.data.failReason || '签到未成功';
-                    $.error(`签到未成功: ${failReason}`);
+                    $.logErr(`签到未成功：${failReason}`);
                     $.notify('中骏小程序', '签到未成功', failReason);
                 }
             } else {
                 const errorMsg = res.message || '未知错误';
-                $.error(`签到失败: ${errorMsg}`);
+                $.logErr(`签到失败：${errorMsg}`);
                 $.notify('中骏小程序', '签到失败', `错误：${errorMsg}`);
             }
         } else {
             throw new Error('响应体为空');
         }
     } catch (error) {
-        $.error(`执行签到流程出错: ${error.message || error}`);
-        $.notify('中骏小程序', '签到失败', `签到流程执行失败: ${error.message || '未知错误'}`);
+        $.logErr(`执行签到流程出错：${error.message || error}`);
+        $.notify('中骏小程序', '签到失败', `签到流程执行失败：${error.message || '未知错误'}`);
     } finally {
         $.done();
     }
 }
 
-// 参数获取函数 - 简化版，自动捕获并保存token、customerId和shopCode
+// 参数获取函数
 function GetParameter() {
     try {
         $.log("[中骏] 进入参数获取模式");
@@ -152,10 +152,10 @@ function GetParameter() {
                 const currentToken = $.read(KEYS.TOKEN);
                 if (currentToken !== token) {
                     $.write(token, KEYS.TOKEN);
-                    $.log(`[中骏] 成功更新token: ${token.substring(0, 10)}...`);
+                    $.log(`[中骏] 成功更新token：${token.substring(0, 10)}...`);
                     tokenUpdated = true;
                 } else {
-                    $.log(`[中骏] token已存在且未变化: ${token.substring(0, 10)}...`);
+                    $.log(`[中骏] token已存在且未变化：${token.substring(0, 10)}...`);
                 }
             }
         }
@@ -164,63 +164,63 @@ function GetParameter() {
         if (typeof $request !== 'undefined' && $request.body) {
             try {
                 const body = JSON.parse($request.body);
-                $.log(`[中骏] 请求体内容: ${JSON.stringify(body).substring(0, 200)}...`);
+                $.log(`[中骏] 请求体内容：${JSON.stringify(body).substring(0, 200)}...`);
                 
-                // 检查并保存customerId
+                // 获取并保存customerId
                 if (body.customerId) {
                     customerIdFound = true;
                     const currentCustomerId = $.read(KEYS.CUSTOMER_ID);
                     if (currentCustomerId !== body.customerId) {
                         $.write(body.customerId, KEYS.CUSTOMER_ID);
-                        $.log(`[中骏] 成功更新customerId: ${body.customerId}`);
+                        $.log(`[中骏] 成功更新customerId：${body.customerId}`);
                         customerIdUpdated = true;
                     } else {
-                        $.log(`[中骏] customerId已存在且未变化: ${body.customerId}`);
+                        $.log(`[中骏] customerId已存在且未变化：${body.customerId}`);
                     }
                 }
                 
-                // 检查并保存shopCode
+                // 获取并保存shopCode
                 if (body.shopCode) {
                     shopCodeFound = true;
                     const currentShopCode = $.read(KEYS.SHOP_CODE);
                     if (currentShopCode !== body.shopCode) {
                         $.write(body.shopCode, KEYS.SHOP_CODE);
-                        $.log(`[中骏] 成功更新shopCode: ${body.shopCode}`);
+                        $.log(`[中骏] 成功更新shopCode：${body.shopCode}`);
                         shopCodeUpdated = true;
                     } else {
-                        $.log(`[中骏] shopCode已存在且未变化: ${body.shopCode}`);
+                        $.log(`[中骏] shopCode已存在且未变化：${body.shopCode}`);
                     }
                 }
                 
-                // 检查并保存token（从请求体）
+                // 获取并保存token（从请求体）
                 if (!tokenFound && body.token) {
                     tokenFound = true;
-                    const currentToken = $.read(TOKEN_KEY);
+                    const currentToken = $.read(KEYS.TOKEN);
                     if (currentToken !== body.token) {
-                        $.write(body.token, TOKEN_KEY);
-                        $.log(`[中骏] 从请求体成功更新token: ${body.token.substring(0, 10)}...`);
+                        $.write(body.token, KEYS.TOKEN);
+                        $.log(`[中骏] 从请求体成功更新token：${body.token.substring(0, 10)}...`);
                         tokenUpdated = true;
                     } else {
                         $.log(`[中骏] 从请求体读取token，但已存在且未变化`);
                     }
                 }
             } catch (e) {
-                $.error(`[中骏] 解析请求体失败: ${e}`);
+                $.logErr(`[中骏] 解析请求体失败：${e}`);
             }
         }
         
-        // 3. 从用户信息接口响应中获取数据
+        // 3. 从响应信息中获取数据
         if (!tokenFound && !customerIdFound && !shopCodeFound && typeof $response !== 'undefined' && $response && $response.body) {
             try {
                 const resBody = JSON.parse($response.body);
                 if (resBody && resBody.data) {
-                    // 尝试从用户信息中提取数据
+                    // 尝试从响应信息中获取数据
                     if (resBody.data.token) {
                         tokenFound = true;
                         const currentToken = $.read(KEYS.TOKEN);
                         if (currentToken !== resBody.data.token) {
                             $.write(resBody.data.token, KEYS.TOKEN);
-                            $.log(`[中骏] 从响应体成功更新token: ${resBody.data.token.substring(0, 10)}...`);
+                            $.log(`[中骏] 从响应体成功更新token：${resBody.data.token.substring(0, 10)}...`);
                             tokenUpdated = true;
                         } else {
                             $.log(`[中骏] 从响应体读取token，但已存在且未变化`);
@@ -232,7 +232,7 @@ function GetParameter() {
                         const currentCustomerId = $.read(KEYS.CUSTOMER_ID);
                         if (currentCustomerId !== resBody.data.customerId) {
                             $.write(resBody.data.customerId, KEYS.CUSTOMER_ID);
-                            $.log(`[中骏] 从响应体成功更新customerId: ${resBody.data.customerId}`);
+                            $.log(`[中骏] 从响应体成功更新customerId：${resBody.data.customerId}`);
                             customerIdUpdated = true;
                         } else {
                             $.log(`[中骏] 从响应体读取customerId，但已存在且未变化`);
@@ -244,7 +244,7 @@ function GetParameter() {
                         const currentShopCode = $.read(KEYS.SHOP_CODE);
                         if (currentShopCode !== resBody.data.shopCode) {
                             $.write(resBody.data.shopCode, KEYS.SHOP_CODE);
-                            $.log(`[中骏] 从响应体成功更新shopCode: ${resBody.data.shopCode}`);
+                            $.log(`[中骏] 从响应体成功更新shopCode：${resBody.data.shopCode}`);
                             shopCodeUpdated = true;
                         } else {
                             $.log(`[中骏] 从响应体读取shopCode，但已存在且未变化`);
@@ -252,7 +252,7 @@ function GetParameter() {
                     }
                 }
             } catch (e) {
-                $.error(`[中骏] 解析响应体失败: ${e}`);
+                $.logErr(`[中骏] 解析响应体失败：${e}`);
             }
         }
         
@@ -268,19 +268,19 @@ function GetParameter() {
             if (tokenFound) params.push(`Token${tokenUpdated ? '(已更新)' : ''}`);
             if (customerIdFound) params.push(`CustomerId${customerIdUpdated ? '(已更新)' : ''}`);
             if (shopCodeFound) params.push(`ShopCode${shopCodeUpdated ? '(已更新)' : ''}`);
-            message = `已获取${params.join('、')}`;
+            message = `已获取：${params.join('、')}`;
             
             $.log(`[中骏] ${message}`);
-            $.log(`[中骏] 当前保存的token: ${existingToken ? existingToken.substring(0, 10) + '...' : '无'}`);
-            $.log(`[中骏] 当前保存的customerId: ${existingCustomerId || '无'}`);
-            $.log(`[中骏] 当前保存的shopCode: ${existingShopCode || '无'}`);
+            $.log(`[中骏] 当前保存的token：${existingToken ? existingToken.substring(0, 10) + '...' : '无'}`);
+            $.log(`[中骏] 当前保存的customerId：${existingCustomerId || '无'}`);
+            $.log(`[中骏] 当前保存的shopCode：${existingShopCode || '无'}`);
             
             // 发送通知
             if (tokenUpdated || customerIdUpdated || shopCodeUpdated) {
                 try { 
                     $.notify('中骏小程序', '参数获取成功', message); 
                 } catch (e) {
-                    $.error(`[中骏] 发送通知失败: ${e}`);
+                    $.logErr(`[中骏] 发送通知失败：${e}`);
                 }
             }
         } else {
@@ -288,9 +288,9 @@ function GetParameter() {
             $.log("[中骏] 请确保在正确的接口上执行参数获取");
         }
     } catch (error) {
-        $.error(`[中骏] 参数获取出错: ${error}`);
+        $.logErr(`[中骏] 参数获取出错：${error}`);
         try {
-            $.notify('中骏小程序', '参数获取失败', `错误: ${error.message || error}`);
+            $.notify('中骏小程序', '参数获取失败', `错误：${error.message || error}`);
         } catch (e) {}
     } finally {
         // 确保在脚本结束时调用$.done()
@@ -303,14 +303,13 @@ function GetParameter() {
 }
 
 // 根据环境决定是执行签到还是获取参数
-// 增强环境检测日志，便于调试
-$.log(`环境检测: 当前环境状态日志开始`);
-$.log(`环境检测: $request存在=${typeof $request !== 'undefined'}`);
-$.log(`环境检测: $response存在=${typeof $response !== 'undefined'}`);
-$.log(`环境检测: $loon存在=${typeof $loon !== 'undefined'} (Loon环境)`);
-$.log(`环境检测: $task存在=${typeof $task !== 'undefined'} (QuantumultX环境)`);
-$.log(`环境检测: $httpClient存在=${typeof $httpClient !== 'undefined'} (Surge环境)`);
-$.log(`环境检测: $done存在=${typeof $done !== 'undefined'}`);
+$.log(`环境检测：当前环境状态日志开始`);
+$.log(`环境检测：$request存在=${typeof $request !== 'undefined'}`);
+$.log(`环境检测：$response存在=${typeof $response !== 'undefined'}`);
+$.log(`环境检测：$loon存在=${typeof $loon !== 'undefined'} (Loon环境)`);
+$.log(`环境检测：$task存在=${typeof $task !== 'undefined'} (QuantumultX环境)`);
+$.log(`环境检测：$httpClient存在=${typeof $httpClient !== 'undefined'} (Surge环境)`);
+$.log(`环境检测：$done存在=${typeof $done !== 'undefined'}`);
 
 // 检查是否是签到请求
 function isSignRequest() {
@@ -320,12 +319,12 @@ function isSignRequest() {
         }
         return false;
     } catch (e) {
-        $.error(`检查请求失败: ${e}`);
+        $.logErr(`检查请求失败：${e}`);
         return false;
     }
 }
 
-// 检查请求体中是否包含签到所需的参数
+// 检查请求体中是否包含签到需要的参数
 function hasSignParamsInRequest() {
     try {
         if (typeof $request !== 'undefined' && $request.body) {
@@ -334,27 +333,27 @@ function hasSignParamsInRequest() {
         }
         return false;
     } catch (e) {
-        $.error(`解析请求体失败: ${e}`);
+        $.logErr(`解析请求体失败：${e}`);
         return false;
     }
 }
 
-// 如果检测到签到请求，则先获取参数，然后结束
+// 如果检测到签到请求，则获取参数，否则执行签到
 if (isSignRequest()) {
-    $.log("环境检测: 检测到签到请求，自动捕获签到参数");
+    $.log("环境检测：检测到签到请求，自动获取签到参数");
     if (hasSignParamsInRequest()) {
         GetParameter();
     } else {
-        $.log("环境检测: 签到请求中未找到必要参数");
+        $.log("环境检测：签到请求中未找到必要参数");
         $done();
     }
 } else {
-    // 定时任务或手动运行时，执行签到功能
+    // 定时任务或主动运行时，执行签到功能
     $.log("脚本开始执行，运行签到功能");
     signIn();
 }
 
-$.log(`环境检测: 当前环境状态日志结束`);
+$.log(`环境检测：当前环境状态日志结束`);
 
-// OpenAPI 核心代码 - Peng-YM 压缩版
-function ENV() { const e = "function" == typeof require && "undefined" != typeof $jsbox; return { isQX: "undefined" != typeof $task, isLoon: "undefined" != typeof $loon, isSurge: "undefined" != typeof $httpClient && "undefined" != typeof $utils, isBrowser: "undefined" != typeof document, isNode: "function" == typeof require && !e, isJSBox: e, isRequest: "undefined" != typeof $request, isScriptable: "undefined" != typeof importModule } } function HTTP(e = { baseURL: "" }) { const { isQX: t, isLoon: s, isSurge: o, isScriptable: n, isNode: i, isBrowser: r } = ENV(), u = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/; const a = {}; return ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "PATCH"].forEach(h => a[h.toLowerCase()] = (a => (function (a, h) { h = "string" == typeof h ? { url: h } : h; const d = e.baseURL; d && !u.test(h.url || "") && (h.url = d ? d + h.url : h.url), h.body && h.headers && !h.headers["Content-Type"] && (h.headers["Content-Type"] = "application/x-www-form-urlencoded"); const l = (h = { ...e, ...h }).timeout, c = { onRequest: () => { }, onResponse: e => e, onTimeout: () => { }, ...h.events }; let f, p; if (c.onRequest(a, h), t) f = $task.fetch({ method: a, ...h }); else if (s || o || i) f = new Promise((e, t) => { (i ? require("request") : $httpClient)[a.toLowerCase()](h, (s, o, n) => { s ? t(s) : e({ statusCode: o.status || o.statusCode, headers: o.headers, body: n }) }) }); else if (n) { const e = new Request(h.url); e.method = a, e.headers = h.headers, e.body = h.body, f = new Promise((t, s) => { e.loadString().then(s => { t({ statusCode: e.response.statusCode, headers: e.response.headers, body: s }) }).catch(e => s(e)) }) } else r && (f = new Promise((e, t) => { fetch(h.url, { method: a, headers: h.headers, body: h.body }).then(e => e.json()).then(t => e({ statusCode: t.status, headers: t.headers, body: t.data })).catch(t) })); const y = l ? new Promise((e, t) => { p = setTimeout(() => (c.onTimeout(), t(`${a} URL: ${h.url} exceeds the timeout ${l} ms`)), l) }) : null; return (y ? Promise.race([y, f]).then(e => (clearTimeout(p), e)) : f).then(e => c.onResponse(e)) })(h, a))), a } function API(e = "untitled", t = !1) { const { isQX: s, isLoon: o, isSurge: n, isNode: i, isJSBox: r, isScriptable: u } = ENV(); return new class { constructor(e, t) { this.name = e, this.debug = t, this.http = HTTP(), this.env = ENV(), this.node = (() => { if (i) { return { fs: require("fs") } } return null })(), this.initCache(); Promise.prototype.delay = function (e) { return this.then(function (t) { return ((e, t) => new Promise(function (s) { setTimeout(s.bind(null, t), e) }))(e, t) }) } } initCache() { if (s && (this.cache = JSON.parse($prefs.valueForKey(this.name) || "{}")), (o || n) && (this.cache = JSON.parse($persistentStore.read(this.name) || "{}")), i) { let e = "root.json"; this.node.fs.existsSync(e) || this.node.fs.writeFileSync(e, JSON.stringify({}), { flag: "wx" }, e => console.log(e)), this.root = {}, e = `${this.name}.json`, this.node.fs.existsSync(e) ? this.cache = JSON.parse(this.node.fs.readFileSync(`${this.name}.json`)) : (this.node.fs.writeFileSync(e, JSON.stringify({}), { flag: "wx" }, e => console.log(e)), this.cache = {}) } } persistCache() { const e = JSON.stringify(this.cache, null, 2); s && $prefs.setValueForKey(e, this.name), (o || n) && $persistentStore.write(e, this.name), i && (this.node.fs.writeFileSync(`${this.name}.json`, e, { flag: "w" }, e => console.log(e)), this.node.fs.writeFileSync("root.json", JSON.stringify(this.root, null, 2), { flag: "w" }, e => console.log(e))) } write(e, t) { if (this.log(`SET ${t}`), -1 !== t.indexOf("#")) { if (t = t.substr(1), n || o) return $persistentStore.write(e, t); if (s) return $prefs.setValueForKey(e, t); i && (this.root[t] = e) } else this.cache[t] = e; this.persistCache() } read(e) { return this.log(`READ ${e}`), -1 === e.indexOf("#") ? this.cache[e] : (e = e.substr(1), n || o ? $persistentStore.read(e) : s ? $prefs.valueForKey(e) : i ? this.root[e] : void 0) } delete(e) { if (this.log(`DELETE ${e}`), -1 !== e.indexOf("#")) { if (e = e.substr(1), n || o) return $persistentStore.write(null, e); if (s) return $prefs.removeValueForKey(e); i && delete this.root[e] } else delete this.cache[e]; this.persistCache() } notify(e, t = "", a = "", h = {}) { const d = h["open-url"], l = h["media-url"]; if (s && $notify(e, t, a, h), n && $notification.post(e, t, a + `${l ? "\n多媒体:" + l : ""}`, { url: d }), o) { let s = {}; d && (s.openUrl = d), l && (s.mediaUrl = l), "{}" === JSON.stringify(s) ? $notification.post(e, t, a) : $notification.post(e, t, a, s) } if (i || u) { const s = a + (d ? `\n点击跳转: ${d}` : "") + (l ? `\n多媒体: ${l}` : ""); if (r) { require("push").schedule({ title: e, body: (t ? t + "\n" : "") + s }) } else console.log(`${e}\n${t}\n${s}\n\n`) } } log(e) { this.debug && console.log(`[${this.name}] LOG: ${this.stringify(e)}`) } info(e) { console.log(`[${this.name}] INFO: ${this.stringify(e)}`) } error(e) { console.log(`[${this.name}] ERROR: ${this.stringify(e)}`) } wait(e) { return new Promise(t => setTimeout(t, e)) } done(e = {}) { s || o || n ? $done(e) : i && !r && "undefined" != typeof $context && ($context.headers = e.headers, $context.statusCode = e.statusCode, $context.body = e.body) } stringify(e) { if ("string" == typeof e || e instanceof String) return e; try { return JSON.stringify(e, null, 2) } catch (e) { return "[object Object]" } } }(e, t) }
+// Env.min.js 核心代码 - Chavy 官方版本
+function Env(e,t){class s{constructor(e){this.env=e}send(e,t="GET"){e="string"==typeof e?{url:e}:e;let s=this.get;"POST"===t&&(s=this.post);const i=new Promise(((t,i)=>{s.call(this,e,((e,s,o)=>{e?i(e):t(s)}))}));return e.timeout?((e,t=1e3)=>Promise.race([e,new Promise(((e,s)=>{setTimeout((()=>{s(new Error("请求超时"))}),t)}))]))(i,e.timeout):i}get(e){return this.send.call(this.env,e)}post(e){return this.send.call(this.env,e,"POST")}}return new class{constructor(e,t){this.logLevels={debug:0,info:1,warn:2,error:3},this.logLevelPrefixs={debug:"[DEBUG] ",info:"[INFO] ",warn:"[WARN] ",error:"[ERROR] "},this.logLevel="info",this.name=e,this.http=new s(this),this.data=null,this.dataFile="box.dat",this.logs=[],this.isMute=!1,this.isNeedRewrite=!1,this.logSeparator="\n",this.encoding="utf-8",this.startTime=(new Date).getTime(),Object.assign(this,t),this.log("",`${this.name}, 开始`)}getEnv(){return"undefined"!=typeof $environment&&$environment["surge-version"]?"Surge":"undefined"!=typeof $environment&&$environment["stash-version"]?"Stash":"undefined"!=typeof module&&module.exports?"Node.js":"undefined"!=typeof $task?"Quantumult X":"undefined"!=typeof $loon?"Loon":"undefined"!=typeof $rocket?"Shadowrocket":void 0}isNode(){return"Node.js"===this.getEnv()}isQuanX(){return"Quantumult X"===this.getEnv()}isSurge(){return"Surge"===this.getEnv()}isLoon(){return"Loon"===this.getEnv()}isShadowrocket(){return"Shadowrocket"===this.getEnv()}isStash(){return"Stash"===this.getEnv()}toObj(e,t=null){try{return JSON.parse(e)}catch{return t}}toStr(e,t=null,...s){try{return JSON.stringify(e,...s)}catch{return t}}getjson(e,t){let s=t;if(this.getdata(e))try{s=JSON.parse(this.getdata(e))}catch{}return s}setjson(e,t){try{return this.setdata(JSON.stringify(e),t)}catch{return!1}}getdata(e){let t=this.getval(e);if(/^@/.test(e)){const[,s,i]=/^@(.*?)\.(.*?)$/.exec(e),o=s?this.getval(s):"";if(o)try{const e=JSON.parse(o);t=e?this.lodash_get(e,i,""):t}catch(e){t=""}}return t}setdata(e,t){let s=!1;if(/^@/.test(t)){const[,i,o]=/^@(.*?)\.(.*?)$/.exec(t),r=this.getval(i),a=i?"null"===r?null:r||"{}":"{}";try{const t=JSON.parse(a);this.lodash_set(t,o,e),s=this.setval(JSON.stringify(t),i)}catch(t){const r={};this.lodash_set(r,o,e),s=this.setval(JSON.stringify(r),i)}}else s=this.setval(e,t);return s}getval(e){switch(this.getEnv()){case"Surge":case"Loon":case"Stash":case"Shadowrocket":return $persistentStore.read(e);case"Quantumult X":return $prefs.valueForKey(e);case"Node.js":return this.data=this.loaddata(),this.data[e];default:return this.data&&this.data[e]||null}}setval(e,t){switch(this.getEnv()){case"Surge":case"Loon":case"Stash":case"Shadowrocket":return $persistentStore.write(e,t);case"Quantumult X":return $prefs.setValueForKey(e,t);case"Node.js":return this.data=this.loaddata(),this.data[t]=e,this.writedata(),!0;default:return this.data&&this.data[t]||null}}lodash_get(e,t,s){const i=t.replace(/\[(\d+)\]/g,".$1").split(".");let o=e;for(const e of i)if(o=Object(o)[e],void 0===o)return s;return o}lodash_set(e,t,s){return Object(e)!==e||(Array.isArray(t)||(t=t.toString().match(/[^.[\]]+/g)||[]),t.slice(0,-1).reduce(((e,s,i)=>Object(e[s])===e[s]?e[s]:e[s]=Math.abs(t[i+1])>>0==+t[i+1]?[]:{}),e)[t[t.length-1]]=s),e}loaddata(){if(!this.isNode())return{};{this.fs=this.fs?this.fs:require("fs"),this.path=this.path?this.path:require("path");const e=this.path.resolve(this.dataFile),t=this.path.resolve(process.cwd(),this.dataFile),s=this.fs.existsSync(e),i=!s&&this.fs.existsSync(t);if(!s&&!i)return{};{const i=s?e:t;try{return JSON.parse(this.fs.readFileSync(i))}catch(e){return{}}}}}writedata(){if(this.isNode()){this.fs=this.fs?this.fs:require("fs"),this.path=this.path?this.path:require("path");const e=this.path.resolve(this.dataFile),t=this.path.resolve(process.cwd(),this.dataFile),s=this.fs.existsSync(e),i=!s&&this.fs.existsSync(t),o=JSON.stringify(this.data);s?this.fs.writeFileSync(e,o):i?this.fs.writeFileSync(t,o):this.fs.writeFileSync(e,o)}}msg(t=e,s="",i="",o={}){const r=e=>{const{$open:t,$copy:s,$media:i,$mediaMime:o}=e;switch(typeof e){case void 0:return;case"string":switch(this.getEnv()){case"Surge":case"Stash":default:return{url:e};case"Loon":case"Shadowrocket":return e;case"Quantumult X":return{"open-url":e};case"Node.js":return}case"object":switch(this.getEnv()){case"Surge":case"Stash":case"Shadowrocket":default:{const r={};let a=e.openUrl||e.url||e["open-url"]||t;a&&Object.assign(r,{action:"open-url",url:a});let n=e["update-pasteboard"]||e.updatePasteboard||s;n&&Object.assign(r,{action:"clipboard",text:n});let h=e.mediaUrl||e["media-url"]||i;if(h){let e,t;if(h.startsWith("http"));else if(h.startsWith("data:")){const[s]=h.split(";"),[,i]=h.split(",");e=i,t=s.replace("data:","")}else{e=h,t=(e=>{const t={JVBERi0:"application/pdf",R0lGODdh:"image/gif",R0lGODlh:"image/gif",iVBORw0KGgo:"image/png","/9j/":"image/jpg"};for(var s in t)if(0===e.indexOf(s))return t[s];return null})(h)}Object.assign(r,{"media-url":h,"media-base64":e,"media-base64-mime":o??t})}return Object.assign(r,{"auto-dismiss":e["auto-dismiss"],sound:e.sound}),r}case"Loon":{const s={};let o=e.openUrl||e.url||e["open-url"]||t;o&&Object.assign(s,{openUrl:o});let r=e.mediaUrl||e["media-url"]||i;return r&&Object.assign(s,{mediaUrl:r}),console.log(JSON.stringify(s)),s}case"Quantumult X":{const o={};let r=e["open-url"]||e.url||e.openUrl||t;r&&Object.assign(o,{"open-url":r});let a=e.mediaUrl||e["media-url"]||i;a&&Object.assign(o,{"media-url":a});let n=e["update-pasteboard"]||e.updatePasteboard||s;return n&&Object.assign(o,{"update-pasteboard":n}),console.log(JSON.stringify(o)),o}case"Node.js":return}default:return}};if(!this.isMute)switch(this.getEnv()){case"Surge":case"Loon":case"Stash":case"Shadowrocket":default:$notification.post(t,s,i,r(o));break;case"Quantumult X":$notify(t,s,i,r(o));break;case"Node.js":break}if(!this.isMuteLog){let e=["","==============系统通知=============="];e.push(t),s&&e.push(s),i&&e.push(i),console.log(e.join("\n")),this.logs=this.logs.concat(e)}}debug(...e){this.logLevels[this.logLevel]<=this.logLevels.debug&&(e.length>0&&(this.logs=[...this.logs,...e]),console.log(`${this.logLevelPrefixs.debug}${e.map((e=>e??String(e))).join(this.logSeparator)}`))}info(...e){this.logLevels[this.logLevel]<=this.logLevels.info&&(e.length>0&&(this.logs=[...this.logs,...e]),console.log(`${this.logLevelPrefixs.info}${e.map((e=>e??String(e))).join(this.logSeparator)}`))}warn(...e){this.logLevels[this.logLevel]<=this.logLevels.warn&&(e.length>0&&(this.logs=[...this.logs,...e]),console.log(`${this.logLevelPrefixs.warn}${e.map((e=>e??String(e))).join(this.logSeparator)}`))}error(...e){this.logLevels[this.logLevel]<=this.logLevels.error&&(e.length>0&&(this.logs=[...this.logs,...e]),console.log(`${this.logLevelPrefixs.error}${e.map((e=>e??String(e))).join(this.logSeparator)}`))}log(...e){e.length>0&&(this.logs=[...this.logs,...e]),console.log(e.map((e=>e??String(e))).join(this.logSeparator))}logErr(e,t){switch(this.getEnv()){case"Surge":case"Loon":case"Stash":case"Shadowrocket":case"Quantumult X":default:this.log("",`${this.name}, 错误!`,t,e);break;case"Node.js":this.log("",`${this.name}, 错误!`,t,void 0!==e.message?e.message:e,e.stack);break}}wait(e){return new Promise((t=>setTimeout(t,e)))}done(e={}){const t=((new Date).getTime()-this.startTime)/1e3;switch(this.log("",`${this.name}, 结束!  ${t} 秒`),this.log(),this.getEnv()){case"Surge":case"Loon":case"Stash":case"Shadowrocket":case"Quantumult X":default:$done(e);break;case"Node.js":process.exit(1)}}}(e,t)}
