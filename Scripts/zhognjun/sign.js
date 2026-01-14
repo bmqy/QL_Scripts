@@ -19,9 +19,9 @@ const $ = new API("ZhongJunSign", true);
 // 配置信息
 const API_HOST = "api.sce-icm.com";
 const KEYS = {
-    TOKEN: "@zhognjun.token",
-    CUSTOMER_ID: "@zhognjun.customerId",
-    SHOP_CODE: "@zhognjun.shopCode"
+    TOKEN: "#zhognjun.token",
+    CUSTOMER_ID: "#zhognjun.customerId",
+    SHOP_CODE: "#zhognjun.shopCode"
 };
 const url = `https://${API_HOST}/api/v1/dig-mall/customer/sign/signNow`;
 

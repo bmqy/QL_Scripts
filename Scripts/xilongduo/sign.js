@@ -19,9 +19,9 @@ const $ = new API("XiLongDuo", true);
 
 // BoxJS 字段名称定义
 const KEYS = {
-    TOKEN: "@XiLongDuo.token",
-    MALLID: "@XiLongDuo.mallID",
-    SYSTEMINFO: "@XiLongDuo.systemInfo"
+    TOKEN: "#XiLongDuo.token",
+    MALLID: "#XiLongDuo.mallID",
+    SYSTEMINFO: "#XiLongDuo.systemInfo"
 };
 
 // 执行签到
