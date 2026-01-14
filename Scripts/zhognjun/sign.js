@@ -16,13 +16,21 @@
 // 初始化Env，启用BoxJs 支持
 const $ = new Env("ZhongJunSign");
 
+// 存储键名 - 使用统一的数据存储
+const CONFIG_KEY = "zhognjun_config";
+
+// 从存储中读取配置
+function getConfig() {
+    return $.toObj($.getdata(CONFIG_KEY)) || { token: "", customerId: "", shopCode: "" };
+}
+
+// 保存配置到存储
+function saveConfig(config) {
+    return $.setjson(config, CONFIG_KEY);
+}
+
 // 配置信息
 const API_HOST = "api.sce-icm.com";
-const KEYS = {
-    TOKEN: "#zhognjun.token",
-    CUSTOMER_ID: "#zhognjun.customerId",
-    SHOP_CODE: "#zhognjun.shopCode"
-};
 const url = `https://${API_HOST}/api/v1/dig-mall/customer/sign/signNow`;
 
 // 获取当前时间戳
@@ -36,17 +44,16 @@ function getCurrentTimestamp() {
 async function getXHttpToken() {
     $.log("开始获取x-http-token");
     
-    // 从BoxJs 读取token
-    let token = $.getdata(KEYS.TOKEN);
-    
-    if (token) {
-        $.log("从BoxJs 获取到token");
-        return token;
+    // 从存储中读取token
+    const config = getConfig();
+    if (config.token) {
+        $.log("从存储获取到token");
+        return config.token;
     }
     
     // 如果本地没有，提示用户配置
-    $.logErr("BoxJs 中未找到token，请先配置");
-    $.notify('中骏小程序', '配置错误', '请在 BoxJs 中配置 token 参数');
+    $.logErr("存储中未找到token，请先配置");
+    $.msg('中骏小程序', '配置错误', '请在 BoxJs 中配置 token 参数');
     throw new Error("未配置token");
 }
 
@@ -55,13 +62,14 @@ async function signIn() {
     try {
         $.log("开始执行签到流程");
         
-        // 从BoxJs 读取配置
-        const customerId = $.getdata(KEYS.CUSTOMER_ID);
-        const shopCode = $.getdata(KEYS.SHOP_CODE);
+        // 从存储读取配置
+        const config = getConfig();
+        const customerId = config.customerId;
+        const shopCode = config.shopCode;
         
         // 检查必要的配置是否存在
         if (!customerId || !shopCode) {
-            $.notify('中骏小程序', '配置错误', '请在 BoxJs 中完整配置 customerId 和 shopCode');
+            $.msg('中骏小程序', '配置错误', '请在 BoxJs 中完整配置 customerId 和 shopCode');
             $.logErr("配置不完整：缺少 customerId 或 shopCode");
             return;
         }
@@ -137,161 +145,61 @@ async function signIn() {
 function GetParameter() {
     try {
         $.log("[中骏] 进入参数获取模式");
-        let tokenFound = false;
-        let customerIdFound = false;
-        let shopCodeFound = false;
-        let tokenUpdated = false;
-        let customerIdUpdated = false;
-        let shopCodeUpdated = false;
+        let config = getConfig();
+        let updated = false;
         
         // 1. 从请求头中获取token
         if (typeof $request !== 'undefined' && $request.headers && $request.headers['x-http-token']) {
             const token = $request.headers['x-http-token'];
-            if (token) {
-                tokenFound = true;
-                const currentToken = $.getdata(KEYS.TOKEN);
-                if (currentToken !== token) {
-                    $.setdata(token, KEYS.TOKEN);
-                    $.log(`[中骏] 成功更新token：${token.substring(0, 10)}...`);
-                    tokenUpdated = true;
-                } else {
-                    $.log(`[中骏] token已存在且未变化：${token.substring(0, 10)}...`);
-                }
+            if (token && config.token !== token) {
+                config.token = token;
+                $.log(`[中骏] 成功更新token：${token.substring(0, 10)}...`);
+                updated = true;
             }
         }
-        
         // 2. 从请求体中获取customerId和shopCode
         if (typeof $request !== 'undefined' && $request.body) {
             try {
                 const body = JSON.parse($request.body);
                 $.log(`[中骏] 请求体内容：${JSON.stringify(body).substring(0, 200)}...`);
                 
-                // 获取并保存customerId
-                if (body.customerId) {
-                    customerIdFound = true;
-                    const currentCustomerId = $.getdata(KEYS.CUSTOMER_ID);
-                    if (currentCustomerId !== body.customerId) {
-                        $.setdata(body.customerId, KEYS.CUSTOMER_ID);
-                        $.log(`[中骏] 成功更新customerId：${body.customerId}`);
-                        customerIdUpdated = true;
-                    } else {
-                        $.log(`[中骏] customerId已存在且未变化：${body.customerId}`);
-                    }
+                if (body.customerId && config.customerId !== body.customerId) {
+                    config.customerId = body.customerId;
+                    $.log(`[中骏] 成功更新customerId：${body.customerId}`);
+                    updated = true;
                 }
                 
-                // 获取并保存shopCode
-                if (body.shopCode) {
-                    shopCodeFound = true;
-                    const currentShopCode = $.getdata(KEYS.SHOP_CODE);
-                    if (currentShopCode !== body.shopCode) {
-                        $.setdata(body.shopCode, KEYS.SHOP_CODE);
-                        $.log(`[中骏] 成功更新shopCode：${body.shopCode}`);
-                        shopCodeUpdated = true;
-                    } else {
-                        $.log(`[中骏] shopCode已存在且未变化：${body.shopCode}`);
-                    }
+                if (body.shopCode && config.shopCode !== body.shopCode) {
+                    config.shopCode = body.shopCode;
+                    $.log(`[中骏] 成功更新shopCode：${body.shopCode}`);
+                    updated = true;
                 }
                 
-                // 获取并保存token（从请求体）
-                if (!tokenFound && body.token) {
-                    tokenFound = true;
-                    const currentToken = $.getdata(KEYS.TOKEN);
-                    if (currentToken !== body.token) {
-                        $.setdata(body.token, KEYS.TOKEN);
-                        $.log(`[中骏] 从请求体成功更新token：${body.token.substring(0, 10)}...`);
-                        tokenUpdated = true;
-                    } else {
-                        $.log(`[中骏] 从请求体读取token，但已存在且未变化`);
-                    }
+                if (body.token && config.token !== body.token) {
+                    config.token = body.token;
+                    $.log(`[中骏] 从请求体成功更新token：${body.token.substring(0, 10)}...`);
+                    updated = true;
                 }
             } catch (e) {
                 $.logErr(`[中骏] 解析请求体失败：${e}`);
             }
         }
         
-        // 3. 从响应信息中获取数据
-        if (!tokenFound && !customerIdFound && !shopCodeFound && typeof $response !== 'undefined' && $response && $response.body) {
-            try {
-                const resBody = JSON.parse($response.body);
-                if (resBody && resBody.data) {
-                    // 尝试从响应信息中获取数据
-                    if (resBody.data.token) {
-                        tokenFound = true;
-                        const currentToken = $.getdata(KEYS.TOKEN);
-                        if (currentToken !== resBody.data.token) {
-                            $.setdata(resBody.data.token, KEYS.TOKEN);
-                            $.log(`[中骏] 从响应体成功更新token：${resBody.data.token.substring(0, 10)}...`);
-                            tokenUpdated = true;
-                        } else {
-                            $.log(`[中骏] 从响应体读取token，但已存在且未变化`);
-                        }
-                    }
-                    
-                    if (resBody.data.customerId) {
-                        customerIdFound = true;
-                        const currentCustomerId = $.getdata(KEYS.CUSTOMER_ID);
-                        if (currentCustomerId !== resBody.data.customerId) {
-                            $.setdata(resBody.data.customerId, KEYS.CUSTOMER_ID);
-                            $.log(`[中骏] 从响应体成功更新customerId：${resBody.data.customerId}`);
-                            customerIdUpdated = true;
-                        } else {
-                            $.log(`[中骏] 从响应体读取customerId，但已存在且未变化`);
-                        }
-                    }
-                    
-                    if (resBody.data.shopCode) {
-                        shopCodeFound = true;
-                        const currentShopCode = $.getdata(KEYS.SHOP_CODE);
-                        if (currentShopCode !== resBody.data.shopCode) {
-                            $.setdata(resBody.data.shopCode, KEYS.SHOP_CODE);
-                            $.log(`[中骏] 从响应体成功更新shopCode：${resBody.data.shopCode}`);
-                            shopCodeUpdated = true;
-                        } else {
-                            $.log(`[中骏] 从响应体读取shopCode，但已存在且未变化`);
-                        }
-                    }
-                }
-            } catch (e) {
-                $.logErr(`[中骏] 解析响应体失败：${e}`);
-            }
-        }
-        
-        // 简化的参数获取总结
-        const existingToken = $.getdata(KEYS.TOKEN);
-        const existingCustomerId = $.getdata(KEYS.CUSTOMER_ID);
-        const existingShopCode = $.getdata(KEYS.SHOP_CODE);
-        
-        // 判断是否找到参数
-        if (tokenFound || customerIdFound || shopCodeFound) {
-            let message = '';
-            const params = [];
-            if (tokenFound) params.push(`Token${tokenUpdated ? '(已更新)' : ''}`);
-            if (customerIdFound) params.push(`CustomerId${customerIdUpdated ? '(已更新)' : ''}`);
-            if (shopCodeFound) params.push(`ShopCode${shopCodeUpdated ? '(已更新)' : ''}`);
-            message = `已获取：${params.join('、')}`;
-            
-            $.log(`[中骏] ${message}`);
-            $.log(`[中骏] 当前保存的token：${existingToken ? existingToken.substring(0, 10) + '...' : '无'}`);
-            $.log(`[中骏] 当前保存的customerId：${existingCustomerId || '无'}`);
-            $.log(`[中骏] 当前保存的shopCode：${existingShopCode || '无'}`);
-            
-            // 发送通知
-            if (tokenUpdated || customerIdUpdated || shopCodeUpdated) {
-                try { 
-                    $.notify('中骏小程序', '参数获取成功', message); 
-                } catch (e) {
-                    $.logErr(`[中骏] 发送通知失败：${e}`);
-                }
-            }
+        // 3. 保存配置
+        if (updated) {
+            saveConfig(config);
+            $.log(`[中骏] 参数已保存`);
+            $.log(`[中骏] 当前保存的token：${config.token ? config.token.substring(0, 10) + '...' : '无'}`);
+            $.log(`[中骏] 当前保存的customerId：${config.customerId || '无'}`);
+            $.log(`[中骏] 当前保存的shopCode：${config.shopCode || '无'}`);
+            $.msg('中骏小程序', '参数获取成功', '已保存token、customerId和shopCode');
         } else {
             $.log("[中骏] 未找到需要更新的参数");
             $.log("[中骏] 请确保在正确的接口上执行参数获取");
         }
     } catch (error) {
         $.logErr(`[中骏] 参数获取出错：${error}`);
-        try {
-            $.notify('中骏小程序', '参数获取失败', `错误：${error.message || error}`);
-        } catch (e) {}
+        $.msg('中骏小程序', '参数获取失败', `错误：${error.message || error}`);
     } finally {
         // 确保在脚本结束时调用$.done()
         try {
