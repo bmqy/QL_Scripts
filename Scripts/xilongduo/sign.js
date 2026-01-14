@@ -27,8 +27,8 @@ const KEYS = {
 async function signIn() {
     try {
         // 从BoxJs 读取配置
-        const token = $.read(KEYS.TOKEN);
-        const mallID = $.read(KEYS.MALLID);
+        const token = $.getdata(KEYS.TOKEN);
+        const mallID = $.getdata(KEYS.MALLID);
         
         // 检查配置
         if (!token) {
@@ -58,7 +58,7 @@ async function signIn() {
             "miniVersion": "2.71.0.aipj1"
         };
         
-        const savedSystemInfo = $.read(KEYS.SYSTEMINFO);
+        const savedSystemInfo = $.getdata(KEYS.SYSTEMINFO);
         if (savedSystemInfo) {
             try {
                 const parsedSystemInfo = JSON.parse(savedSystemInfo);
@@ -133,9 +133,9 @@ function GetParameter() {
                 // 保存token
                 if (body.Header && body.Header.Token) {
                     tokenFound = true;
-                    const currentToken = $.read(KEYS.TOKEN);
+                    const currentToken = $.getdata(KEYS.TOKEN);
                     if (currentToken !== body.Header.Token) {
-                        $.write(body.Header.Token, KEYS.TOKEN);
+                        $.setdata(body.Header.Token, KEYS.TOKEN);
                         $.log(`[喜隆多] 成功更新token: ${body.Header.Token.substring(0, 10)}...`);
                         tokenUpdated = true;
                     } else {
@@ -147,9 +147,9 @@ function GetParameter() {
                 let mallIdValue = body.MallID || body.MallId;
                 if (mallIdValue !== undefined) {
                     mallIDFound = true;
-                    const currentMallID = $.read(KEYS.MALLID);
+                    const currentMallID = $.getdata(KEYS.MALLID);
                     if (currentMallID !== mallIdValue.toString()) {
-                        $.write(mallIdValue.toString(), KEYS.MALLID);
+                        $.setdata(mallIdValue.toString(), KEYS.MALLID);
                         $.log(`[喜隆多] 成功更新mallID: ${mallIdValue}`);
                         mallIDUpdated = true;
                     } else {
@@ -159,7 +159,7 @@ function GetParameter() {
                 
                 // 保存systemInfo
                 if (body.Header && body.Header.systemInfo) {
-                    $.write(JSON.stringify(body.Header.systemInfo), KEYS.SYSTEMINFO);
+                    $.setdata(JSON.stringify(body.Header.systemInfo), KEYS.SYSTEMINFO);
                     $.log("[喜隆多] 成功保存systemInfo");
                 }
             } catch (e) {
@@ -181,8 +181,8 @@ function GetParameter() {
             
             if (token) {
                 tokenFound = true;
-                if ($.read(KEYS.TOKEN) !== token) {
-                    $.write(token, KEYS.TOKEN);
+                if ($.getdata(KEYS.TOKEN) !== token) {
+                    $.setdata(token, KEYS.TOKEN);
                     $.log(`[喜隆多] 从请求头成功更新token: ${token.substring(0, 10)}...`);
                     tokenUpdated = true;
                 } else {
@@ -213,8 +213,8 @@ function GetParameter() {
                 
                 if (token) {
                     tokenFound = true;
-                    if ($.read(KEYS.TOKEN) !== token) {
-                        $.write(token, KEYS.TOKEN);
+                    if ($.getdata(KEYS.TOKEN) !== token) {
+                        $.setdata(token, KEYS.TOKEN);
                         $.log(`[喜隆多] 从响应体成功更新token: ${token.substring(0, 10)}...`);
                         tokenUpdated = true;
                     } else {
@@ -225,8 +225,8 @@ function GetParameter() {
                 // 检查mallID
                 if (resBody.MallID) {
                     mallIDFound = true;
-                    if ($.read(KEYS.MALLID) !== resBody.MallID.toString()) {
-                        $.write(resBody.MallID.toString(), KEYS.MALLID);
+                    if ($.getdata(KEYS.MALLID) !== resBody.MallID.toString()) {
+                        $.setdata(resBody.MallID.toString(), KEYS.MALLID);
                         $.log(`[喜隆多] 从响应体成功更新mallID: ${resBody.MallID}`);
                         mallIDUpdated = true;
                     } else {
@@ -239,8 +239,8 @@ function GetParameter() {
         }
         
         // 简化的参数获取总结
-        const existingToken = $.read(KEYS.TOKEN);
-        const existingMallID = $.read(KEYS.MALLID);
+        const existingToken = $.getdata(KEYS.TOKEN);
+        const existingMallID = $.getdata(KEYS.MALLID);
         
         // 判断是否找到参数
         if (tokenFound || mallIDFound) {
