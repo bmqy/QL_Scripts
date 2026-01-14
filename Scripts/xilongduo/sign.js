@@ -17,7 +17,7 @@
 const $ = new Env("XiLongDuo");
 
 // 存储键名 - 使用统一的数据存储
-const CONFIG_KEY = "xilongduo_config";
+const CONFIG_KEY = "xilongduo";
 
 // 从存储中读取配置
 function getConfig() {

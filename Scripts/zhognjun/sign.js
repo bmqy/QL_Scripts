@@ -17,7 +17,7 @@
 const $ = new Env("ZhongJunSign");
 
 // 存储键名 - 使用统一的数据存储
-const CONFIG_KEY = "zhognjun_config";
+const CONFIG_KEY = "zhognjun";
 
 // 从存储中读取配置
 function getConfig() {
