@@ -136,15 +136,23 @@ function GetParameter() {
         let tokenFound = false;
         let customerIdFound = false;
         let shopCodeFound = false;
+        let tokenUpdated = false;
+        let customerIdUpdated = false;
+        let shopCodeUpdated = false;
         
         // 1. 从请求头中获取token
         if (typeof $request !== 'undefined' && $request.headers && $request.headers['x-http-token']) {
             const token = $request.headers['x-http-token'];
-            if (token && $.read(TOKEN_KEY) !== token) {
-                $.write(token, TOKEN_KEY);
-                $.log(`[中骏] 成功保存token: ${token.substring(0, 10)}...`);
-                try { $.notify('中骏小程序', '参数更新', '成功保存token'); } catch (e) {}
+            if (token) {
                 tokenFound = true;
+                const currentToken = $.read(TOKEN_KEY);
+                if (currentToken !== token) {
+                    $.write(token, TOKEN_KEY);
+                    $.log(`[中骏] 成功更新token: ${token.substring(0, 10)}...`);
+                    tokenUpdated = true;
+                } else {
+                    $.log(`[中骏] token已存在且未变化: ${token.substring(0, 10)}...`);
+                }
             }
         }
         
@@ -152,29 +160,45 @@ function GetParameter() {
         if (typeof $request !== 'undefined' && $request.body) {
             try {
                 const body = JSON.parse($request.body);
+                $.log(`[中骏] 请求体内容: ${JSON.stringify(body).substring(0, 200)}...`);
                 
                 // 检查并保存customerId
-                if (body.customerId && $.read("customerId") !== body.customerId) {
-                    $.write(body.customerId, "customerId");
-                    $.log(`[中骏] 成功保存customerId: ${body.customerId}`);
-                    try { $.notify('中骏小程序', '参数更新', `成功保存customerId: ${body.customerId}`); } catch (e) {}
+                if (body.customerId) {
                     customerIdFound = true;
+                    const currentCustomerId = $.read("customerId");
+                    if (currentCustomerId !== body.customerId) {
+                        $.write(body.customerId, "customerId");
+                        $.log(`[中骏] 成功更新customerId: ${body.customerId}`);
+                        customerIdUpdated = true;
+                    } else {
+                        $.log(`[中骏] customerId已存在且未变化: ${body.customerId}`);
+                    }
                 }
                 
                 // 检查并保存shopCode
-                if (body.shopCode && $.read("shopCode") !== body.shopCode) {
-                    $.write(body.shopCode, "shopCode");
-                    $.log(`[中骏] 成功保存shopCode: ${body.shopCode}`);
-                    try { $.notify('中骏小程序', '参数更新', `成功保存shopCode: ${body.shopCode}`); } catch (e) {}
+                if (body.shopCode) {
                     shopCodeFound = true;
+                    const currentShopCode = $.read("shopCode");
+                    if (currentShopCode !== body.shopCode) {
+                        $.write(body.shopCode, "shopCode");
+                        $.log(`[中骏] 成功更新shopCode: ${body.shopCode}`);
+                        shopCodeUpdated = true;
+                    } else {
+                        $.log(`[中骏] shopCode已存在且未变化: ${body.shopCode}`);
+                    }
                 }
                 
                 // 检查并保存token（从请求体）
-                if (!tokenFound && body.token && $.read(TOKEN_KEY) !== body.token) {
-                    $.write(body.token, TOKEN_KEY);
-                    $.log(`[中骏] 从请求体成功保存token: ${body.token.substring(0, 10)}...`);
-                    try { $.notify('中骏小程序', '参数更新', '成功保存token'); } catch (e) {}
+                if (!tokenFound && body.token) {
                     tokenFound = true;
+                    const currentToken = $.read(TOKEN_KEY);
+                    if (currentToken !== body.token) {
+                        $.write(body.token, TOKEN_KEY);
+                        $.log(`[中骏] 从请求体成功更新token: ${body.token.substring(0, 10)}...`);
+                        tokenUpdated = true;
+                    } else {
+                        $.log(`[中骏] 从请求体读取token，但已存在且未变化`);
+                    }
                 }
             } catch (e) {
                 $.error(`[中骏] 解析请求体失败: ${e}`);
@@ -187,25 +211,40 @@ function GetParameter() {
                 const resBody = JSON.parse($response.body);
                 if (resBody && resBody.data) {
                     // 尝试从用户信息中提取数据
-                    if (resBody.data.token && $.read(TOKEN_KEY) !== resBody.data.token) {
-                        $.write(resBody.data.token, TOKEN_KEY);
-                        $.log(`[中骏] 从响应体成功保存token: ${resBody.data.token.substring(0, 10)}...`);
-                        try { $.notify('中骏小程序', '参数更新', '成功保存token'); } catch (e) {}
+                    if (resBody.data.token) {
                         tokenFound = true;
+                        const currentToken = $.read(TOKEN_KEY);
+                        if (currentToken !== resBody.data.token) {
+                            $.write(resBody.data.token, TOKEN_KEY);
+                            $.log(`[中骏] 从响应体成功更新token: ${resBody.data.token.substring(0, 10)}...`);
+                            tokenUpdated = true;
+                        } else {
+                            $.log(`[中骏] 从响应体读取token，但已存在且未变化`);
+                        }
                     }
                     
-                    if (resBody.data.customerId && $.read("customerId") !== resBody.data.customerId) {
-                        $.write(resBody.data.customerId, "customerId");
-                        $.log(`[中骏] 从响应体成功保存customerId: ${resBody.data.customerId}`);
-                        try { $.notify('中骏小程序', '参数更新', `成功保存customerId: ${resBody.data.customerId}`); } catch (e) {}
+                    if (resBody.data.customerId) {
                         customerIdFound = true;
+                        const currentCustomerId = $.read("customerId");
+                        if (currentCustomerId !== resBody.data.customerId) {
+                            $.write(resBody.data.customerId, "customerId");
+                            $.log(`[中骏] 从响应体成功更新customerId: ${resBody.data.customerId}`);
+                            customerIdUpdated = true;
+                        } else {
+                            $.log(`[中骏] 从响应体读取customerId，但已存在且未变化`);
+                        }
                     }
                     
-                    if (resBody.data.shopCode && $.read("shopCode") !== resBody.data.shopCode) {
-                        $.write(resBody.data.shopCode, "shopCode");
-                        $.log(`[中骏] 从响应体成功保存shopCode: ${resBody.data.shopCode}`);
-                        try { $.notify('中骏小程序', '参数更新', `成功保存shopCode: ${resBody.data.shopCode}`); } catch (e) {}
+                    if (resBody.data.shopCode) {
                         shopCodeFound = true;
+                        const currentShopCode = $.read("shopCode");
+                        if (currentShopCode !== resBody.data.shopCode) {
+                            $.write(resBody.data.shopCode, "shopCode");
+                            $.log(`[中骏] 从响应体成功更新shopCode: ${resBody.data.shopCode}`);
+                            shopCodeUpdated = true;
+                        } else {
+                            $.log(`[中骏] 从响应体读取shopCode，但已存在且未变化`);
+                        }
                     }
                 }
             } catch (e) {
@@ -214,10 +253,35 @@ function GetParameter() {
         }
         
         // 简化的参数获取总结
+        const existingToken = $.read(TOKEN_KEY);
+        const existingCustomerId = $.read("customerId");
+        const existingShopCode = $.read("shopCode");
+        
+        // 判断是否找到参数
         if (tokenFound || customerIdFound || shopCodeFound) {
-            $.log(`[中骏] 参数获取成功，token${tokenFound ? '已更新' : '未变化'}，customerId${customerIdFound ? '已更新' : '未变化'}，shopCode${shopCodeFound ? '已更新' : '未变化'}`);
+            let message = '';
+            const params = [];
+            if (tokenFound) params.push(`Token${tokenUpdated ? '(已更新)' : ''}`);
+            if (customerIdFound) params.push(`CustomerId${customerIdUpdated ? '(已更新)' : ''}`);
+            if (shopCodeFound) params.push(`ShopCode${shopCodeUpdated ? '(已更新)' : ''}`);
+            message = `已获取${params.join('、')}`;
+            
+            $.log(`[中骏] ${message}`);
+            $.log(`[中骏] 当前保存的token: ${existingToken ? existingToken.substring(0, 10) + '...' : '无'}`);
+            $.log(`[中骏] 当前保存的customerId: ${existingCustomerId || '无'}`);
+            $.log(`[中骏] 当前保存的shopCode: ${existingShopCode || '无'}`);
+            
+            // 发送通知
+            if (tokenUpdated || customerIdUpdated || shopCodeUpdated) {
+                try { 
+                    $.notify('中骏小程序', '参数获取成功', message); 
+                } catch (e) {
+                    $.error(`[中骏] 发送通知失败: ${e}`);
+                }
+            }
         } else {
             $.log("[中骏] 未找到需要更新的参数");
+            $.log("[中骏] 请确保在正确的接口上执行参数获取");
         }
     } catch (error) {
         $.error(`[中骏] 参数获取出错: ${error}`);
