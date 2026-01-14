@@ -18,7 +18,11 @@ const $ = new API("ZhongJunSign", true);
 
 // 配置信息
 const API_HOST = "api.sce-icm.com";
-const TOKEN_KEY = "token";
+const KEYS = {
+    TOKEN: "@zhognjun.token",
+    CUSTOMER_ID: "@zhognjun.customerId",
+    SHOP_CODE: "@zhognjun.shopCode"
+};
 const url = `https://${API_HOST}/api/v1/dig-mall/customer/sign/signNow`;
 
 // 获取当前时间戳
@@ -33,7 +37,7 @@ async function getXHttpToken() {
     $.log("开始获取x-http-token");
     
     // 从 BoxJs 读取token
-    let token = $.read(TOKEN_KEY);
+    let token = $.read(KEYS.TOKEN);
     
     if (token) {
         $.log("从 BoxJs 获取到token");
@@ -52,8 +56,8 @@ async function signIn() {
         $.log("开始执行签到流程");
         
         // 从 BoxJs 读取配置
-        const customerId = $.read("customerId");
-        const shopCode = $.read("shopCode");
+        const customerId = $.read(KEYS.CUSTOMER_ID);
+        const shopCode = $.read(KEYS.SHOP_CODE);
         
         // 检查必要的配置是否存在
         if (!customerId || !shopCode) {
@@ -145,9 +149,9 @@ function GetParameter() {
             const token = $request.headers['x-http-token'];
             if (token) {
                 tokenFound = true;
-                const currentToken = $.read(TOKEN_KEY);
+                const currentToken = $.read(KEYS.TOKEN);
                 if (currentToken !== token) {
-                    $.write(token, TOKEN_KEY);
+                    $.write(token, KEYS.TOKEN);
                     $.log(`[中骏] 成功更新token: ${token.substring(0, 10)}...`);
                     tokenUpdated = true;
                 } else {
@@ -165,9 +169,9 @@ function GetParameter() {
                 // 检查并保存customerId
                 if (body.customerId) {
                     customerIdFound = true;
-                    const currentCustomerId = $.read("customerId");
+                    const currentCustomerId = $.read(KEYS.CUSTOMER_ID);
                     if (currentCustomerId !== body.customerId) {
-                        $.write(body.customerId, "customerId");
+                        $.write(body.customerId, KEYS.CUSTOMER_ID);
                         $.log(`[中骏] 成功更新customerId: ${body.customerId}`);
                         customerIdUpdated = true;
                     } else {
@@ -178,9 +182,9 @@ function GetParameter() {
                 // 检查并保存shopCode
                 if (body.shopCode) {
                     shopCodeFound = true;
-                    const currentShopCode = $.read("shopCode");
+                    const currentShopCode = $.read(KEYS.SHOP_CODE);
                     if (currentShopCode !== body.shopCode) {
-                        $.write(body.shopCode, "shopCode");
+                        $.write(body.shopCode, KEYS.SHOP_CODE);
                         $.log(`[中骏] 成功更新shopCode: ${body.shopCode}`);
                         shopCodeUpdated = true;
                     } else {
@@ -213,9 +217,9 @@ function GetParameter() {
                     // 尝试从用户信息中提取数据
                     if (resBody.data.token) {
                         tokenFound = true;
-                        const currentToken = $.read(TOKEN_KEY);
+                        const currentToken = $.read(KEYS.TOKEN);
                         if (currentToken !== resBody.data.token) {
-                            $.write(resBody.data.token, TOKEN_KEY);
+                            $.write(resBody.data.token, KEYS.TOKEN);
                             $.log(`[中骏] 从响应体成功更新token: ${resBody.data.token.substring(0, 10)}...`);
                             tokenUpdated = true;
                         } else {
@@ -225,9 +229,9 @@ function GetParameter() {
                     
                     if (resBody.data.customerId) {
                         customerIdFound = true;
-                        const currentCustomerId = $.read("customerId");
+                        const currentCustomerId = $.read(KEYS.CUSTOMER_ID);
                         if (currentCustomerId !== resBody.data.customerId) {
-                            $.write(resBody.data.customerId, "customerId");
+                            $.write(resBody.data.customerId, KEYS.CUSTOMER_ID);
                             $.log(`[中骏] 从响应体成功更新customerId: ${resBody.data.customerId}`);
                             customerIdUpdated = true;
                         } else {
@@ -237,9 +241,9 @@ function GetParameter() {
                     
                     if (resBody.data.shopCode) {
                         shopCodeFound = true;
-                        const currentShopCode = $.read("shopCode");
+                        const currentShopCode = $.read(KEYS.SHOP_CODE);
                         if (currentShopCode !== resBody.data.shopCode) {
-                            $.write(resBody.data.shopCode, "shopCode");
+                            $.write(resBody.data.shopCode, KEYS.SHOP_CODE);
                             $.log(`[中骏] 从响应体成功更新shopCode: ${resBody.data.shopCode}`);
                             shopCodeUpdated = true;
                         } else {
@@ -253,9 +257,9 @@ function GetParameter() {
         }
         
         // 简化的参数获取总结
-        const existingToken = $.read(TOKEN_KEY);
-        const existingCustomerId = $.read("customerId");
-        const existingShopCode = $.read("shopCode");
+        const existingToken = $.read(KEYS.TOKEN);
+        const existingCustomerId = $.read(KEYS.CUSTOMER_ID);
+        const existingShopCode = $.read(KEYS.SHOP_CODE);
         
         // 判断是否找到参数
         if (tokenFound || customerIdFound || shopCodeFound) {
