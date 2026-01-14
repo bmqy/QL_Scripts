@@ -114,32 +114,39 @@ function GetParameter() {
         $.log("[喜隆多] 进入参数获取模式");
         let tokenFound = false;
         let mallIDFound = false;
+        let tokenUpdated = false;
+        let mallIDUpdated = false;
         
         // 1. 从请求体中获取token和mallID
         if (typeof $request !== 'undefined' && $request.body) {
             try {
                 const body = JSON.parse($request.body);
+                $.log(`[喜隆多] 请求体内容: ${JSON.stringify(body).substring(0, 200)}...`);
                 
                 // 保存token
                 if (body.Header && body.Header.Token) {
+                    tokenFound = true;
                     const currentToken = $.read("token");
                     if (currentToken !== body.Header.Token) {
                         $.write(body.Header.Token, "token");
-                        $.log(`[喜隆多] 成功保存token: ${body.Header.Token.substring(0, 10)}...`);
-                        try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
-                        tokenFound = true;
+                        $.log(`[喜隆多] 成功更新token: ${body.Header.Token.substring(0, 10)}...`);
+                        tokenUpdated = true;
+                    } else {
+                        $.log(`[喜隆多] token已存在且未变化: ${body.Header.Token.substring(0, 10)}...`);
                     }
                 }
                 
                 // 保存mallID
                 let mallIdValue = body.MallID || body.MallId;
                 if (mallIdValue !== undefined) {
+                    mallIDFound = true;
                     const currentMallID = $.read("mallID");
                     if (currentMallID !== mallIdValue.toString()) {
                         $.write(mallIdValue.toString(), "mallID");
-                        $.log(`[喜隆多] 成功保存mallID: ${mallIdValue}`);
-                        try { $.notify('喜隆多小程序', '参数更新', `成功保存mallID: ${mallIdValue}`); } catch (e) {}
-                        mallIDFound = true;
+                        $.log(`[喜隆多] 成功更新mallID: ${mallIdValue}`);
+                        mallIDUpdated = true;
+                    } else {
+                        $.log(`[喜隆多] mallID已存在且未变化: ${mallIdValue}`);
                     }
                 }
                 
@@ -165,11 +172,15 @@ function GetParameter() {
                 token = headers.token;
             }
             
-            if (token && $.read("token") !== token) {
-                $.write(token, "token");
-                $.log(`[喜隆多] 从请求头成功保存token: ${token.substring(0, 10)}...`);
-                try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
+            if (token) {
                 tokenFound = true;
+                if ($.read("token") !== token) {
+                    $.write(token, "token");
+                    $.log(`[喜隆多] 从请求头成功更新token: ${token.substring(0, 10)}...`);
+                    tokenUpdated = true;
+                } else {
+                    $.log(`[喜隆多] 从请求头读取token，但已存在且未变化`);
+                }
             }
         }
         
@@ -193,18 +204,27 @@ function GetParameter() {
                     }
                 }
                 
-                if (token && $.read("token") !== token) {
-                    $.write(token, "token");
-                    $.log(`[喜隆多] 从响应体成功保存token: ${token.substring(0, 10)}...`);
-                    try { $.notify('喜隆多小程序', '参数更新', '成功保存token'); } catch (e) {}
+                if (token) {
                     tokenFound = true;
+                    if ($.read("token") !== token) {
+                        $.write(token, "token");
+                        $.log(`[喜隆多] 从响应体成功更新token: ${token.substring(0, 10)}...`);
+                        tokenUpdated = true;
+                    } else {
+                        $.log(`[喜隆多] 从响应体读取token，但已存在且未变化`);
+                    }
                 }
                 
                 // 检查mallID
-                if (resBody.MallID && $.read("mallID") !== resBody.MallID.toString()) {
-                    $.write(resBody.MallID.toString(), "mallID");
-                    $.log(`[喜隆多] 从响应体成功保存mallID: ${resBody.MallID}`);
+                if (resBody.MallID) {
                     mallIDFound = true;
+                    if ($.read("mallID") !== resBody.MallID.toString()) {
+                        $.write(resBody.MallID.toString(), "mallID");
+                        $.log(`[喜隆多] 从响应体成功更新mallID: ${resBody.MallID}`);
+                        mallIDUpdated = true;
+                    } else {
+                        $.log(`[喜隆多] 从响应体读取mallID，但已存在且未变化`);
+                    }
                 }
             } catch (e) {
                 $.error(`[喜隆多] 解析响应体失败: ${e}`);
@@ -215,10 +235,32 @@ function GetParameter() {
         const existingToken = $.read("token");
         const existingMallID = $.read("mallID");
         
+        // 判断是否找到参数
         if (tokenFound || mallIDFound) {
-            $.log(`[喜隆多] 参数获取成功，token${tokenFound ? '已更新' : '未变化'}，mallID${mallIDFound ? '已更新' : '未变化'}`);
+            let message = '';
+            if (tokenFound && mallIDFound) {
+                message = `Token和MallID均已获取${tokenUpdated || mallIDUpdated ? '并更新' : ''}`;
+            } else if (tokenFound) {
+                message = `Token已获取${tokenUpdated ? '并更新' : ''}`;
+            } else if (mallIDFound) {
+                message = `MallID已获取${mallIDUpdated ? '并更新' : ''}`;
+            }
+            
+            $.log(`[喜隆多] ${message}`);
+            $.log(`[喜隆多] 当前保存的token: ${existingToken ? existingToken.substring(0, 10) + '...' : '无'}`);
+            $.log(`[喜隆多] 当前保存的mallID: ${existingMallID || '无'}`);
+            
+            // 发送通知
+            if (tokenUpdated || mallIDUpdated) {
+                try { 
+                    $.notify('喜隆多小程序', '参数获取成功', message); 
+                } catch (e) {
+                    $.error(`[喜隆多] 发送通知失败: ${e}`);
+                }
+            }
         } else {
             $.log("[喜隆多] 未找到需要更新的参数");
+            $.log("[喜隆多] 请确保在正确的接口上执行参数获取");
         }
     } catch (error) {
         $.error(`[喜隆多] 参数获取出错: ${error}`);
@@ -245,11 +287,7 @@ $.log(`环境检测: $task存在=${typeof $task !== 'undefined'} (QuantumultX环
 $.log(`环境检测: $httpClient存在=${typeof $httpClient !== 'undefined'} (Surge环境)`);
 $.log(`环境检测: $done存在=${typeof $done !== 'undefined'}`);
 
-// 先直接执行签到功能
-$.log("脚本开始执行，直接运行签到功能");
-signIn();
-
-// 检查是否是请求事件并且请求体中含有token和mallID，如果是则执行获取参数方法
+// 检查是否是请求事件并且请求体中含有token和mallID
 function hasTokenAndMallIDInRequestBody() {
     try {
         if (typeof $request !== 'undefined' && $request.body) {
@@ -263,10 +301,13 @@ function hasTokenAndMallIDInRequestBody() {
     }
 }
 
-// 如果是请求事件且请求体中含有token和mallID，执行参数获取方法
+// 判断运行模式：如果是请求事件且请求体中含有token和mallID，执行参数获取方法；否则执行签到
 if (typeof $request !== 'undefined' && hasTokenAndMallIDInRequestBody()) {
     $.log("环境检测: 检测到请求事件且请求体包含token和mallID，执行参数获取功能");
     GetParameter();
+} else {
+    $.log("脚本开始执行，运行签到功能");
+    signIn();
 }
 
 $.log(`环境检测: 当前环境状态日志结束`);
