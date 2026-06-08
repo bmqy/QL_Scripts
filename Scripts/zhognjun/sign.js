@@ -148,23 +148,23 @@ async function signIn() {
                 if (res.data.isSuccess) {
                     let message = `+${res.data.signDailyPoint}。下次签到奖励：${res.data.nextAwardCount}。连续签到：${res.data.totalSignCount}天`;
                     $.log(`签到成功：${message}`);
-                    $.notify('中骏小程序', '签到成功', message);
+                    $.msg('中骏小程序', '签到成功', message);
                 } else {
                     const failReason = res.data.failReason || '签到未成功';
                     $.logErr(`签到未成功：${failReason}`);
-                    $.notify('中骏小程序', '签到未成功', failReason);
+                    $.msg('中骏小程序', '签到未成功', failReason);
                 }
             } else {
                 const errorMsg = res.message || '未知错误';
                 $.logErr(`签到失败：${errorMsg}`);
-                $.notify('中骏小程序', '签到失败', `错误：${errorMsg}`);
+                $.msg('中骏小程序', '签到失败', `错误：${errorMsg}`);
             }
         } else {
             throw new Error('响应体为空');
         }
     } catch (error) {
         $.logErr(`执行签到流程出错：${error.message || error}`);
-        $.notify('中骏小程序', '签到失败', `签到流程执行失败：${error.message || '未知错误'}`);
+        $.msg('中骏小程序', '签到失败', `签到流程执行失败：${error.message || '未知错误'}`);
     } finally {
         $.done();
     }
