@@ -31,34 +31,6 @@ function saveConfig(config) {
 
 // BoxJS 字段名称定义（使用兼容格式，不使用 # 前缀）
 
-async function httpPost(options) {
-    const req = {
-        url: options.url,
-        headers: options.headers,
-        body: options.body,
-        method: 'POST'
-    };
-
-    if (typeof $task !== 'undefined' && typeof $task.fetch === 'function') {
-        return await $task.fetch(req);
-    }
-
-    if (typeof $httpClient !== 'undefined' && typeof $httpClient.post === 'function') {
-        return await new Promise((resolve, reject) => {
-            $httpClient.post(req, (error, response, body) => {
-                if (error) return reject(error);
-                resolve({
-                    statusCode: response && response.statusCode,
-                    headers: response && response.headers,
-                    body
-                });
-            });
-        });
-    }
-
-    throw new Error('当前环境不支持HTTP请求');
-}
-
 // 执行签到
 async function signIn() {
     try {
@@ -112,7 +84,7 @@ async function signIn() {
         };
         
         $.log("开始发送签到请求");
-        const response = await httpPost(options);
+        const response = await $.http.post(options);
         
         if (response && response.body) {
             $.log(`签到请求成功，状态码: ${response.statusCode}`);
