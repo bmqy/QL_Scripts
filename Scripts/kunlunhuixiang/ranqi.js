@@ -99,6 +99,34 @@ function bodyValue(body, name) {
   }
 }
 
+function httpGet(options) {
+  if (typeof $task !== 'undefined' && $task && typeof $task.fetch === 'function') {
+    return $task.fetch({
+      url: options.url,
+      method: 'GET',
+      headers: options.headers || {}
+    });
+  }
+
+  if (typeof $httpClient !== 'undefined' && $httpClient && typeof $httpClient.get === 'function') {
+    return new Promise((resolve, reject) => {
+      $httpClient.get({
+        url: options.url,
+        headers: options.headers || ''
+      }, (error, response, body) => {
+        if (error) return reject(error);
+        resolve({
+          statusCode: response && (response.statusCode || response.status),
+          headers: response && response.headers,
+          body: body || ''
+        });
+      });
+    });
+  }
+
+  throw new Error('当前环境不支持 GET 请求');
+}
+
 async function queryBalance() {
   const authorization = $.getdata(KEY.authorization);
   const userCode = $.getdata(KEY.userCode);
@@ -110,9 +138,8 @@ async function queryBalance() {
     return;
   }
 
-  const resp = await $task.fetch({
+  const resp = await httpGet({
     url: `${API}?userCode=${encodeURIComponent(userCode)}&mdmCode=${encodeURIComponent(mdmCode)}`,
-    method: 'GET',
     headers: {
       Authorization: authorization,
       Accept: 'application/json, text/plain, */*',
