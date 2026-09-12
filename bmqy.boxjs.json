@@ -108,68 +108,68 @@
 			]
 		},
 		{
-			"id": "KunLunHuiXiang",
-			"name": "昆仑惠享燃气",
+			"id": "ranqi",
+			"name": "中国石油燃气余额",
 			"descs_html": [
-				"点此直达【<a href='https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/kunlunhuixiang/ranqi.js'>脚本地址</a>】",
-				"昆仑惠享燃气查询脚本",
-				"请填写token、用户代码等信息"
+				"点此直达【<a href='https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/kunlunhuixiang/ranqi.js'>脚本地址</a>】",
+				"自动抓取燃气请求参数，并通过 BoxJS 持久化保存",
+				"请先访问燃气小程序或 H5 页面触发参数抓取"
 			],
 			"keys": [
-				"@KunLunHuiXiang.token",
-				"@KunLunHuiXiang.signature",
-				"@KunLunHuiXiang.userCode",
-				"@KunLunHuiXiang.cid"
+				"@ranqi_authorization",
+				"@ranqi_userCode",
+				"@ranqi_mdmCode",
+				"@ranqi_notify"
 			],
 			"settings": [
 				{
-					"id": "@KunLunHuiXiang.token",
-					"name": "token",
+					"id": "@ranqi_authorization",
+					"name": "Authorization",
 					"val": "",
-					"placeholder": "填写token",
+					"placeholder": "自动抓取，也可手动填写",
 					"type": "textarea",
 					"autoGrow": true,
 					"rows": 3,
-					"desc": "从抓包中获取的token"
+					"desc": "燃气请求 Authorization，脚本会自动写入"
 				},
 				{
-					"id": "@KunLunHuiXiang.signature",
-					"name": "signature",
+					"id": "@ranqi_userCode",
+					"name": "户号（userCode）",
 					"val": "",
-					"placeholder": "填写signature",
+					"placeholder": "自动抓取，也可手动填写",
 					"type": "text",
 					"autoGrow": false,
 					"rows": 1,
-					"desc": "从抓包中获取的签名"
+					"desc": "燃气用户户号，脚本会自动写入"
 				},
 				{
-					"id": "@KunLunHuiXiang.userCode",
-					"name": "用户代码",
-					"val": "xxx",
-					"placeholder": "填写用户代码",
+					"id": "@ranqi_mdmCode",
+					"name": "表号（mdmCode）",
+					"val": "",
+					"placeholder": "自动抓取，也可手动填写",
 					"type": "text",
 					"autoGrow": false,
 					"rows": 1,
-					"desc": "用户识别代码"
+					"desc": "燃气表号，脚本会自动写入"
 				},
 				{
-					"id": "@KunLunHuiXiang.cid",
-					"name": "CID",
-					"val": "xxx",
-					"placeholder": "填写CID",
+					"id": "@ranqi_notify",
+					"name": "查询后推送通知",
+					"val": "true",
+					"placeholder": "true 或 false",
 					"type": "text",
 					"autoGrow": false,
 					"rows": 1,
-					"desc": "客户ID"
+					"desc": "填写 true 推送通知，填写 false 仅写入日志"
 				}
 			],
 			"author": "@bmqy",
-			"repo": "https://github.com/bmqy/QuantumultX/master/Scripts/kunlunhuixiang",
+			"repo": "https://github.com/bmqy/QL_Scripts/tree/dev/Scripts/kunlunhuixiang",
 			"icons": [
 				"https://img.alicdn.com/tfs/TB1vQo5aV39YK4jSZPcXXbTqpXa-256-256.png",
 				"https://img.alicdn.com/tfs/TB1vQo5aV39YK4jSZPcXXbTqpXa-256-256.png"
 			],
-			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/kunlunhuixiang/ranqi.js"
+			"script": "https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/kunlunhuixiang/ranqi.js"
 		},
 		{
 			"id": "smmo-helper",

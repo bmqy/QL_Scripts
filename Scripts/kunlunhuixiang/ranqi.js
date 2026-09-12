@@ -1,89 +1,165 @@
 /**
- * 昆仑惠享燃气查询脚本
- * 使用 Peng-YM OpenAPI 实现跨平台兼容
- * https://github.com/Peng-YM/QuanX/tree/master/Tools/OpenAPI
+ * 中国石油燃气余额查询（Quantumult X）
+ *
+ * 功能：
+ * 1. 访问燃气小程序/H5 时，自动抓取 getDebt4Wsyyt 请求里的 Authorization、userCode、mdmCode；
+ * 2. 请求参数写入 BoxJS 持久化存储；
+ * 3. 定时任务从 BoxJS 读取参数查询余额。
+ *
+ * BoxJS：将同目录的 ranqi.boxjs.json 添加为订阅。
+ * 请求捕获规则（建议监听整个站点，再由脚本筛选）：
+ * ^https?:\\/\\/bol\\.grs\\.petrochina\\.com\\.cn\\/ url script-request-header ranqi.js
  */
 
-// 初始化 OpenAPI
-const $ = new API("KunLunHuiXiang", false);
-
-// 从BoxJs读取配置
-const boxConfig = {
-    token: $.read('token'),
-    signature: $.read('signature'),
-    userCode: $.read('userCode'),
-    cid: $.read('cid')
+const $ = new Env('燃气余额');
+const API = 'https://bol.grs.petrochina.com.cn/retail/preservice/gasFeePay/getDebt4Wsyyt';
+const KEY = {
+  authorization: 'ranqi_authorization',
+  userCode: 'ranqi_userCode',
+  mdmCode: 'ranqi_mdmCode',
+  notify: 'ranqi_notify'
 };
 
-// 检查必要的配置是否存在
-if (!boxConfig.token || !boxConfig.signature) {
-    $.notify('昆仑惠享燃气', '配置错误', '请在BoxJs中填写token和signature');
-    $.done();
-}
-
-// 执行查询
-checkGasInfo();
-
-async function checkGasInfo() {
-    try {
-        const url = "https://bol.grs.petrochina.com.cn/api/v1/open/recharge/getUserDebtByUserCode";
-        
-        // 构建请求体
-        const body = JSON.stringify({
-            "cid": parseInt(boxConfig.cid),
-            "userCode": boxConfig.userCode,
-            "terminalType": 5
-        });
-        
-        // 构建请求头
-        const headers = {
-            'Connection': 'keep-alive',
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'X-Requested-With': 'XMLHttpRequest',
-            'Origin': 'https://bol.grs.petrochina.com.cn',
-            'Referer': 'https://bol.grs.petrochina.com.cn/h5/',
-            'Content-Type': 'application/json;charset=UTF-8',
-            'Sec-Fetch-Mode': 'cors',
-            'Accept-Language': 'zh-CN,zh-Hans;q=0.9',
-            'Host': 'bol.grs.petrochina.com.cn',
-            'Sec-Fetch-Site': 'same-origin',
-            'timestamp': '' + Date.now(), // 使用当前时间戳
-            'signature': boxConfig.signature,
-            'token': boxConfig.token,
-            'Sec-Fetch-Dest': 'empty',
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.46(0x18002e15) NetType/4G Language/zh_CN',
-            'Content-Length': '' + Buffer.from(body).length
-        };
-        
-        // 发送请求
-        const options = {
-            url: url,
-            headers: headers,
-            body: body
-        };
-        
-        $.log("开始发送请求");
-        const response = await $.http.post(options);
-        
-        if (response && response.body) {
-            const json = JSON.parse(response.body);
-            
-            if (json.code == 1) {
-                $.notify('燃气信息', '', `余额：${json.data.remoteMeterBalance}，最近读数：${json.data.readingLastTime}`);
-            } else {
-                $.notify('燃气信息', '查询失败', `错误：${json.message || '未知错误'}`);
-            }
-        } else {
-            throw new Error('响应体为空');
-        }
-    } catch (error) {
-        $.error(`请求过程中出错: ${error}`);
-        $.notify('燃气信息', '请求错误', `无法连接到服务器: ${error.message || '未知错误'}`);
-    } finally {
-        $.done();
+(async () => {
+  try {
+    if (typeof $request !== 'undefined' && $request && $request.url) {
+      await captureRequest();
+    } else {
+      await queryBalance();
     }
+  } catch (e) {
+    $.logErr(e);
+    $.msg('燃气余额', '', `执行失败：${e.message || e}`);
+  } finally {
+    $done();
+  }
+})();
+
+function header(headers, name) {
+  if (!headers) return '';
+  const key = Object.keys(headers).find(k => k.toLowerCase() === name.toLowerCase());
+  return key ? String(headers[key] || '') : '';
 }
 
-// OpenAPI 核心代码
-function ENV() { const e = "function" == typeof require && "undefined" != typeof $jsbox; return { isQX: "undefined" != typeof $task, isLoon: "undefined" != typeof $loon, isSurge: "undefined" != typeof $httpClient && "undefined" != typeof $utils, isBrowser: "undefined" != typeof document, isNode: "function" == typeof require && !e, isJSBox: e, isRequest: "undefined" != typeof $request, isScriptable: "undefined" != typeof importModule } } function HTTP(e = { baseURL: "" }) { const { isQX: t, isLoon: s, isSurge: o, isScriptable: n, isNode: i, isBrowser: r } = ENV(), u = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/; const a = {}; return ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "PATCH"].forEach(h => a[h.toLowerCase()] = (a => (function (a, h) { h = "string" == typeof h ? { url: h } : h; const d = e.baseURL; d && !u.test(h.url || "") && (h.url = d ? d + h.url : h.url), h.body && h.headers && !h.headers["Content-Type"] && (h.headers["Content-Type"] = "application/x-www-form-urlencoded"); const l = (h = { ...e, ...h }).timeout, c = { onRequest: () => { }, onResponse: e => e, onTimeout: () => { }, ...h.events }; let f, p; if (c.onRequest(a, h), t) f = $task.fetch({ method: a, ...h }); else if (s || o || i) f = new Promise((e, t) => { (i ? require("request") : $httpClient)[a.toLowerCase()](h, (s, o, n) => { s ? t(s) : e({ statusCode: o.status || o.statusCode, headers: o.headers, body: n }) }) }); else if (n) { const e = new Request(h.url); e.method = a, e.headers = h.headers, e.body = h.body, f = new Promise((t, s) => { e.loadString().then(s => { t({ statusCode: e.response.statusCode, headers: e.response.headers, body: s }) }).catch(e => s(e)) }) } else r && (f = new Promise((e, t) => { fetch(h.url, { method: a, headers: h.headers, body: h.body }).then(e => e.json()).then(t => e({ statusCode: t.status, headers: t.headers, body: t.data })).catch(t) })); const y = l ? new Promise((e, t) => { p = setTimeout(() => (c.onTimeout(), t(`${a} URL: ${h.url} exceeds the timeout ${l} ms`)), l) }) : null; return (y ? Promise.race([y, f]).then(e => (clearTimeout(p), e)) : f).then(e => c.onResponse(e)) })(h, a))), a } function API(e = "untitled", t = !1) { const { isQX: s, isLoon: o, isSurge: n, isNode: i, isJSBox: r, isScriptable: u } = ENV(); return new class { constructor(e, t) { this.name = e, this.debug = t, this.http = HTTP(), this.env = ENV(), this.node = (() => { if (i) { return { fs: require("fs") } } return null })(), this.initCache(); Promise.prototype.delay = function (e) { return this.then(function (t) { return ((e, t) => new Promise(function (s) { setTimeout(s.bind(null, t), e) }))(e, t) }) } } initCache() { if (s && (this.cache = JSON.parse($prefs.valueForKey(this.name) || "{}")), (o || n) && (this.cache = JSON.parse($persistentStore.read(this.name) || "{}")), i) { let e = "root.json"; this.node.fs.existsSync(e) || this.node.fs.writeFileSync(e, JSON.stringify({}), { flag: "wx" }, e => console.log(e)), this.root = {}, e = `${this.name}.json`, this.node.fs.existsSync(e) ? this.cache = JSON.parse(this.node.fs.readFileSync(`${this.name}.json`)) : (this.node.fs.writeFileSync(e, JSON.stringify({}), { flag: "wx" }, e => console.log(e)), this.cache = {}) } } persistCache() { const e = JSON.stringify(this.cache, null, 2); s && $prefs.setValueForKey(e, this.name), (o || n) && $persistentStore.write(e, this.name), i && (this.node.fs.writeFileSync(`${this.name}.json`, e, { flag: "w" }, e => console.log(e)), this.node.fs.writeFileSync("root.json", JSON.stringify(this.root, null, 2), { flag: "w" }, e => console.log(e))) } write(e, t) { if (this.log(`SET ${t}`), -1 !== t.indexOf("#")) { if (t = t.substr(1), n || o) return $persistentStore.write(e, t); if (s) return $prefs.setValueForKey(e, t); i && (this.root[t] = e) } else this.cache[t] = e; this.persistCache() } read(e) { return this.log(`READ ${e}`), -1 === e.indexOf("#") ? this.cache[e] : (e = e.substr(1), n || o ? $persistentStore.read(e) : s ? $prefs.valueForKey(e) : i ? this.root[e] : void 0) } delete(e) { if (this.log(`DELETE ${e}`), -1 !== e.indexOf("#")) { if (e = e.substr(1), n || o) return $persistentStore.write(null, e); if (s) return $prefs.removeValueForKey(e); i && delete this.root[e] } else delete this.cache[e]; this.persistCache() } notify(e, t = "", a = "", h = {}) { const d = h["open-url"], l = h["media-url"]; if (s && $notify(e, t, a, h), n && $notification.post(e, t, a + `${l ? "\n多媒体:" + l : ""}`, { url: d }), o) { let s = {}; d && (s.openUrl = d), l && (s.mediaUrl = l), "{}" === JSON.stringify(s) ? $notification.post(e, t, a) : $notification.post(e, t, a, s) } if (i || u) { const s = a + (d ? `\n点击跳转: ${d}` : "") + (l ? `\n多媒体: ${l}` : ""); if (r) { require("push").schedule({ title: e, body: (t ? t + "\n" : "") + s }) } else console.log(`${e}\n${t}\n${s}\n\n`) } } log(e) { this.debug && console.log(`[${this.name}] LOG: ${this.stringify(e)}`) } info(e) { console.log(`[${this.name}] INFO: ${this.stringify(e)}`) } error(e) { console.log(`[${this.name}] ERROR: ${this.stringify(e)}`) } wait(e) { return new Promise(t => setTimeout(t, e)) } done(e = {}) { s || o || n ? $done(e) : i && !r && "undefined" != typeof $context && ($context.headers = e.headers, $context.statusCode = e.statusCode, $context.body = e.body) } stringify(e) { if ("string" == typeof e || e instanceof String) return e; try { return JSON.stringify(e, null, 2) } catch (e) { return "[object Object]" } } }(e, t) }
+function queryValue(url, name) {
+  const m = String(url || '').match(new RegExp(`[?&]${name}=([^&#]*)`, 'i'));
+  return m ? decodeURIComponent(m[1]) : '';
+}
+
+function maskUserCode(value) {
+  const text = String(value || '');
+  if (!text) return '--';
+  if (text.length <= 2) return '*'.repeat(text.length);
+  if (text.length <= 4) return `${text.slice(0, 1)}${'*'.repeat(text.length - 2)}${text.slice(-1)}`;
+  return `${text.slice(0, 3)}${'*'.repeat(text.length - 5)}${text.slice(-2)}`;
+}
+
+function save(key, value) {
+  if (value !== undefined && value !== null && String(value).trim()) {
+    $.setdata(String(value).trim(), key);
+  }
+}
+
+async function captureRequest() {
+  const requestURL = String($request.url || '');
+  if (!/bol\.grs\.petrochina\.com\.cn/i.test(requestURL)) return;
+
+  // 新版 H5 接口：Authorization + URL 中的 userCode/mdmCode
+  const isDebtRequest = /getDebt4Wsyyt/i.test(requestURL);
+  // 兼容旧版接口，避免页面升级后规则看似触发但脚本无反应
+  const isLegacyRequest = /getUserDebtByUserCode/i.test(requestURL);
+  if (!isDebtRequest && !isLegacyRequest) return;
+
+  const authorization = header($request.headers, 'Authorization');
+  const userCode = queryValue(requestURL, 'userCode') || bodyValue($request.body, 'userCode');
+  const mdmCode = queryValue(requestURL, 'mdmCode');
+
+  if (!authorization || !userCode || !mdmCode) {
+    $.log(`已触发燃气接口，但字段不完整：Authorization=${!!authorization}, userCode=${!!userCode}, mdmCode=${!!mdmCode}`);
+    $.msg('燃气捕获提示', '', '已触发燃气接口，但缺少必要字段；请查看 Quantumult X 日志确认实际请求接口');
+    return;
+  }
+
+  save(KEY.authorization, authorization);
+  save(KEY.userCode, userCode);
+  save(KEY.mdmCode, mdmCode);
+  $.msg('燃气参数已更新', '', `户号：${maskUserCode(userCode)}\n表号：${mdmCode}`);
+  $.log('已将燃气请求必要参数写入 BoxJS');
+}
+
+function bodyValue(body, name) {
+  if (!body) return '';
+  const text = typeof body === 'string' ? body : JSON.stringify(body);
+  try {
+    const obj = JSON.parse(text);
+    return obj && obj[name] !== undefined ? String(obj[name]) : '';
+  } catch (_) {
+    const m = text.match(new RegExp(`(?:["']?${name}["']?)\\s*[:=]\\s*["']?([^,}&"']+)`, 'i'));
+    return m ? m[1] : '';
+  }
+}
+
+async function queryBalance() {
+  const authorization = $.getdata(KEY.authorization);
+  const userCode = $.getdata(KEY.userCode);
+  const mdmCode = $.getdata(KEY.mdmCode);
+  const notify = String($.getdata(KEY.notify) || 'true') !== 'false';
+
+  if (!authorization || !userCode || !mdmCode) {
+    $.msg('燃气余额', '', '未找到参数，请先访问一次燃气小程序/H5，等待自动抓取请求参数');
+    return;
+  }
+
+  const resp = await $task.fetch({
+    url: `${API}?userCode=${encodeURIComponent(userCode)}&mdmCode=${encodeURIComponent(mdmCode)}`,
+    method: 'GET',
+    headers: {
+      Authorization: authorization,
+      Accept: 'application/json, text/plain, */*',
+      Referer: 'https://bol.grs.petrochina.com.cn/retail/h5/',
+      'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 MicroMessenger/8.0'
+    }
+  });
+
+  if (resp.statusCode !== 200) throw new Error(`HTTP ${resp.statusCode}`);
+  const res = JSON.parse(resp.body || '{}');
+  const data = res.data || {};
+  const ok = res.code === 200 && data.respCode === '0000';
+
+  if (!ok) {
+    $.msg('燃气余额', '', `查询失败：${res.msg || data.respDesc || '未知错误'}\n如提示未授权，请重新访问小程序抓取参数`);
+    return;
+  }
+
+  const title = `户号：${maskUserCode(userCode)}`;
+  const detail = [
+    `余额：${data.remoteMeterBalance ?? data.endBalance ?? '--'}`,
+    `最近读数：${data.readingLastTime ?? '--'}`,
+    `通讯时间：${data.remoteMeterLastCommunicationTime ?? '--'}`,
+    data.oweAmount && data.oweAmount !== '0.00' ? `欠费：${data.oweAmount}` : ''
+  ].filter(Boolean).join('\n');
+
+  if (notify) $.notify('燃气信息', title, detail);
+  $.log(detail);
+}
+
+function Env(name) {
+  this.name = name;
+  this.getdata = (key) => {
+    if (typeof $prefs !== 'undefined') return $prefs.valueForKey(key);
+    if (typeof $persistentStore !== 'undefined') return $persistentStore.read(key);
+    return '';
+  };
+  this.setdata = (value, key) => {
+    if (typeof $prefs !== 'undefined') return $prefs.setValueForKey(value, key);
+    if (typeof $persistentStore !== 'undefined') return $persistentStore.write(value, key);
+    return false;
+  };
+  this.notify = (title, subtitle, message) => {
+    if (typeof $notify !== 'undefined') return $notify(title, subtitle, message);
+    if (typeof $notification !== 'undefined') return $notification.post(title, subtitle, message);
+  };
+  this.msg = this.notify;
+  this.log = (...args) => console.log(`[${name}]`, ...args);
+  this.logErr = (e) => console.log(`[${name}]`, e && e.stack ? e.stack : e);
+}
