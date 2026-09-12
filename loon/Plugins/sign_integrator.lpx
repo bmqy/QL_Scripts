@@ -22,9 +22,15 @@ cron "0 9 * * *" script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/d
 # 喜隆多小程序参数获取脚本
 http-request https://m.mallcoo.cn/api/user/User/CheckinV2 script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/xilongduo/sign.js, tag=喜隆多参数获取, enabled=true, requires-body=true
 
+# 中国石油燃气参数获取（新版接口）
+http-request https://bol.grs.petrochina.com.cn/retail/preservice/gasFeePay/getDebt4Wsyyt script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/kunlunhuixiang/ranqi.js, tag=燃气参数获取, enabled=true, requires-body=true
+
+# 中国石油燃气参数获取（兼容旧版接口）
+http-request https://bol.grs.petrochina.com.cn/api/v1/open/recharge/getUserDebtByUserCode script-path=https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/kunlunhuixiang/ranqi.js, tag=燃气参数获取旧接口, enabled=true, requires-body=true
+
 [MITM]
-# 签到相关域名
-hostname = api.sce-icm.com, c2-openapi.longfor.com, m.mallcoo.cn
+# 签到及燃气相关域名
+hostname = api.sce-icm.com, c2-openapi.longfor.com, m.mallcoo.cn, bol.grs.petrochina.com.cn
 
 [Notification]
 # 签到成功通知
