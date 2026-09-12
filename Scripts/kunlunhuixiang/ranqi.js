@@ -65,10 +65,7 @@ async function captureRequest() {
   if (!/bol\.grs\.petrochina\.com\.cn/i.test(requestURL)) return;
 
   // 新版 H5 接口：Authorization + URL 中的 userCode/mdmCode
-  const isDebtRequest = /getDebt4Wsyyt/i.test(requestURL);
-  // 兼容旧版接口，避免页面升级后规则看似触发但脚本无反应
-  const isLegacyRequest = /getUserDebtByUserCode/i.test(requestURL);
-  if (!isDebtRequest && !isLegacyRequest) return;
+  if (!/getDebt4Wsyyt/i.test(requestURL)) return;
 
   const authorization = header($request.headers, 'Authorization');
   const userCode = queryValue(requestURL, 'userCode') || bodyValue($request.body, 'userCode');
