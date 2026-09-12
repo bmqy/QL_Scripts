@@ -16,20 +16,40 @@
 // 初始化Env，启用BoxJs 支持
 const $ = new Env("XiLongDuo");
 
-// 存储键名 - 使用统一的数据存储
-const CONFIG_KEY = "xilongduo";
+// BoxJS 字段
+const BOX_KEYS = {
+    token: "@xilongduo.token",
+    mallID: "@xilongduo.mallID",
+    systemInfo: "@xilongduo.systemInfo"
+};
 
-// 从存储中读取配置
+// 从 BoxJS 读取配置
 function getConfig() {
-    return $.toObj($.getdata(CONFIG_KEY)) || { token: "", mallID: "", systemInfo: null };
+    let systemInfo = $.getdata(BOX_KEYS.systemInfo) || "";
+    if (typeof systemInfo === "string" && systemInfo) {
+        try {
+            systemInfo = JSON.parse(systemInfo);
+        } catch (_) {}
+    }
+    return {
+        token: $.getdata(BOX_KEYS.token) || "",
+        mallID: $.getdata(BOX_KEYS.mallID) || "",
+        systemInfo: systemInfo || null
+    };
 }
 
-// 保存配置到存储
+// 保存配置到 BoxJS 独立字段
 function saveConfig(config) {
-    return $.setjson(config, CONFIG_KEY);
+    const systemInfo = config.systemInfo && typeof config.systemInfo !== "string"
+        ? JSON.stringify(config.systemInfo)
+        : (config.systemInfo || "");
+    const results = [
+        $.setdata(config.token || "", BOX_KEYS.token),
+        $.setdata(config.mallID || "", BOX_KEYS.mallID),
+        $.setdata(systemInfo, BOX_KEYS.systemInfo)
+    ];
+    return results.every(Boolean);
 }
-
-// BoxJS 字段名称定义（使用兼容格式，不使用 # 前缀）
 
 async function httpPost(options) {
     const req = {

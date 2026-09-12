@@ -3,15 +3,15 @@
 	"name": "bmqy应用订阅",
 	"author": "@bmqy",
 	"icon": "https://avatars2.githubusercontent.com/u/7834895",
-	"repo": "https://github.com/bmqy/QuantumultX",
+	"repo": "https://github.com/bmqy/QL_Scripts",
 	"apps": [
 		{
 			"id": "xjmnq",
 			"name": "小鸡模拟器存档续期脚本",
-			"keys": ["@xjmnq.cookie"],
+			"keys": ["@XiaoJiMNQ.CookieXJMNQRenew"],
 			"settings": [
 				{
-					"id": "@xjmnq.cookie",
+					"id": "@XiaoJiMNQ.CookieXJMNQRenew",
 					"name": "小鸡模拟器cookie",
 					"val": "",
 					"placeholder": "例如，JSESSIONID=E9AC33DF92C86F62EEE56UIDFDED78D78DFE)",
@@ -22,8 +22,8 @@
 				}
 			],
 			"author": "@bmqy",
-			"repo": "https://github.com/bmqy/QuantumultX/tree/master/Scripts/xjmnq",
-			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/xjmnq/renew.js",
+			"repo": "https://github.com/bmqy/QL_Scripts/tree/dev/Scripts/xjmnq",
+			"script": "https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/xjmnq/renew.js",
 			"icons": [
 				"https://imgsrc.baidu.com/forum/pic/item/0bd162d9f2d3572cbd11c6e48613632762d0c313.jpg",
 				"https://imgsrc.baidu.com/forum/pic/item/0bd162d9f2d3572cbd11c6e48613632762d0c313.jpg"
@@ -32,10 +32,10 @@
 		{
 			"id": "xilongduo",
 			"name": "喜隆多小程序签到脚本",
-			"keys": ["@XiLongDuo.token", "@XiLongDuo.mallID"],
+			"keys": ["@xilongduo.token", "@xilongduo.mallID", "@xilongduo.systemInfo"],
 			"settings": [
 				{
-					"id": "@XiLongDuo.token",
+					"id": "@xilongduo.token",
 					"name": "token",
 					"val": "",
 					"placeholder": "token",
@@ -45,7 +45,7 @@
 					"desc": "从喜隆多小程序获取的token"
 				},
 				{
-					"id": "@XiLongDuo.mallID",
+					"id": "@xilongduo.mallID",
 					"name": "mallID",
 					"val": "",
 					"placeholder": "mallID",
@@ -53,11 +53,21 @@
 					"autoGrow": false,
 					"rows": 1,
 					"desc": "从喜隆多小程序获取的mallID"
+				},
+				{
+					"id": "@xilongduo.systemInfo",
+					"name": "systemInfo",
+					"val": "",
+					"placeholder": "可选，自动从请求体抓取",
+					"type": "textarea",
+					"autoGrow": true,
+					"rows": 3,
+					"desc": "喜隆多小程序设备信息，脚本会自动保存"
 				}
 			],
 			"author": "@bmqy",
-			"repo": "https://github.com/bmqy/QuantumultX/tree/master/Scripts/xilongduo",
-			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/xilongduo/sign.js",
+			"repo": "https://github.com/bmqy/QL_Scripts/tree/dev/Scripts/xilongduo",
+			"script": "https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/xilongduo/sign.js",
 			"icons": [
 				"http://mmbiz.qpic.cn/sz_mmbiz_png/Dy9u9ZNUT4xmnicssqNibf3uEj6AnLvkO5OTRvUpQQu5jvLJ4XbibicB8bAy6kgWLicxHU6Q6twYjPYcgeYZWV1uH5g/640?wx_fmt=png&wxfrom=200",
 				"http://mmbiz.qpic.cn/sz_mmbiz_png/Dy9u9ZNUT4xmnicssqNibf3uEj6AnLvkO5OTRvUpQQu5jvLJ4XbibicB8bAy6kgWLicxHU6Q6twYjPYcgeYZWV1uH5g/640?wx_fmt=png&wxfrom=200"
@@ -100,8 +110,8 @@
 				}
 			],
 			"author": "@bmqy",
-			"repo": "https://github.com/bmqy/QuantumultX/tree/master/Scripts/zhognjun",
-			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/zhognjun/sign.js",
+			"repo": "https://github.com/bmqy/QL_Scripts/tree/dev/Scripts/zhognjun",
+			"script": "https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/zhognjun/sign.js",
 			"icons": [
 				"https://image.sce-icm.com/prod/zj-mall/img/20220706/a5091fadf5af45dab9b719bd3f459790.png?x-image-process=image/crop,w_99999,h_99999,g_center,image/resize,m_fill,h_128,w_128,limit_1",
 				"https://image.sce-icm.com/prod/zj-mall/img/20220706/a5091fadf5af45dab9b719bd3f459790.png?x-image-process=image/crop,w_99999,h_99999,g_center,image/resize,m_fill,h_128,w_128,limit_1"
@@ -116,14 +126,14 @@
 				"请先访问燃气小程序或 H5 页面触发参数抓取"
 			],
 			"keys": [
-				"@ranqi_authorization",
-				"@ranqi_userCode",
-				"@ranqi_mdmCode",
-				"@ranqi_notify"
+				"ranqi_authorization",
+				"ranqi_userCode",
+				"ranqi_mdmCode",
+				"ranqi_notify"
 			],
 			"settings": [
 				{
-					"id": "@ranqi_authorization",
+					"id": "ranqi_authorization",
 					"name": "Authorization",
 					"val": "",
 					"placeholder": "自动抓取，也可手动填写",
@@ -133,7 +143,7 @@
 					"desc": "燃气请求 Authorization，脚本会自动写入"
 				},
 				{
-					"id": "@ranqi_userCode",
+					"id": "ranqi_userCode",
 					"name": "户号（userCode）",
 					"val": "",
 					"placeholder": "自动抓取，也可手动填写",
@@ -143,7 +153,7 @@
 					"desc": "燃气用户户号，脚本会自动写入"
 				},
 				{
-					"id": "@ranqi_mdmCode",
+					"id": "ranqi_mdmCode",
 					"name": "表号（mdmCode）",
 					"val": "",
 					"placeholder": "自动抓取，也可手动填写",
@@ -153,7 +163,7 @@
 					"desc": "燃气表号，脚本会自动写入"
 				},
 				{
-					"id": "@ranqi_notify",
+					"id": "ranqi_notify",
 					"name": "查询后推送通知",
 					"val": "true",
 					"placeholder": "true 或 false",
@@ -175,32 +185,76 @@
 			"id": "smmo-helper",
 			"name": "SMMO助手",
 			"descs_html": [
-				"点此直达【<a href=\"https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/simple-mmo/smmo_helper.js\">脚本地址</a>】",
+				"点此直达【<a href=\"https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/simple-mmo/smmo_helper.js\">脚本地址</a>】",
 				"Simple-mmo游戏助手"
 			],
 			"keys": [
+				"@SMMOHelper.cookies",
+				"@SMMOHelper.xcsrfToken",
+				"@SMMOHelper.apiToken",
+				"@SMMOHelper.level",
 				"@SMMOHelper.levelStep"
 			],
 			"settings": [
 				{
-					"id": "@SMMOHelper.levelStep",
-					"name": "等级",
+					"id": "@SMMOHelper.cookies",
+					"name": "Cookie",
 					"val": "",
-					"placeholder": "level，默认：100",
-					"type": "text",
+					"placeholder": "自动抓取",
+					"type": "textarea",
 					"autoGrow": true,
+					"rows": 3,
+					"desc": "脚本从请求中自动抓取并保存"
+				},
+				{
+					"id": "@SMMOHelper.xcsrfToken",
+					"name": "xcsrfToken",
+					"val": "",
+					"placeholder": "自动抓取",
+					"type": "textarea",
+					"autoGrow": true,
+					"rows": 2,
+					"desc": "脚本从请求中自动抓取并保存"
+				},
+				{
+					"id": "@SMMOHelper.apiToken",
+					"name": "apiToken",
+					"val": "",
+					"placeholder": "自动抓取",
+					"type": "textarea",
+					"autoGrow": true,
+					"rows": 2,
+					"desc": "脚本从请求中自动抓取并保存"
+				},
+				{
+					"id": "@SMMOHelper.level",
+					"name": "当前等级",
+					"val": "",
+					"placeholder": "脚本自动保存",
+					"type": "text",
+					"autoGrow": false,
 					"rows": 1,
-					"desc": "请填写每隔多少级更新一次Bio"
+					"desc": "脚本运行后自动记录"
+				},
+				{
+					"id": "@SMMOHelper.levelStep",
+					"name": "等级间隔",
+					"val": "100",
+					"placeholder": "默认：100",
+					"type": "text",
+					"autoGrow": false,
+					"rows": 1,
+					"desc": "每隔多少级更新一次 Bio"
 				}
 			],
 			"author": "@bmqy",
-			"repo": "https://github.com/bmqy/QuantumultX/master/Scripts/simple-mmo",
+			"repo": "https://github.com/bmqy/QL_Scripts/tree/dev/Scripts/simple-mmo",
 			"icons": [
 				"https://web.simple-mmo.com/img/dragon-head-trans.png",
 				"https://web.simple-mmo.com/img/dragon-head-trans.png"
 			],
-			"script": "https://raw.githubusercontent.com/bmqy/QuantumultX/master/Scripts/simple-mmo/smmo_helper.js"
+			"script": "https://raw.githubusercontent.com/bmqy/QL_Scripts/dev/Scripts/simple-mmo/smmo_helper.js"
 		}
 	],
-	"updateTime": "2025-09-26 13:53"
+	"updateTime": "2026-09-12 10:00"
 }

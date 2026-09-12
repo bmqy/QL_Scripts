@@ -16,17 +16,32 @@
 // 初始化Env，启用BoxJs 支持
 const $ = new Env("ZhongJunSign");
 
-// 存储键名 - 使用统一的数据存储
+// BoxJS 配置键名
 const CONFIG_KEY = "zhognjun";
+const BOX_KEYS = {
+    token: "@zhognjun.token",
+    customerId: "@zhognjun.customerId",
+    shopCode: "@zhognjun.shopCode"
+};
 
-// 从存储中读取配置
+// 从 BoxJS 读取配置；兼容旧版 JSON 整体配置
 function getConfig() {
-    return $.toObj($.getdata(CONFIG_KEY)) || { token: "", customerId: "", shopCode: "" };
+    const legacy = $.toObj($.getdata(CONFIG_KEY)) || {};
+    return {
+        token: $.getdata(BOX_KEYS.token) || legacy.token || "",
+        customerId: $.getdata(BOX_KEYS.customerId) || legacy.customerId || "",
+        shopCode: $.getdata(BOX_KEYS.shopCode) || legacy.shopCode || ""
+    };
 }
 
-// 保存配置到存储
+// 保存配置到 BoxJS 独立字段
 function saveConfig(config) {
-    return $.setjson(config, CONFIG_KEY);
+    const results = [
+        $.setdata(config.token || "", BOX_KEYS.token),
+        $.setdata(config.customerId || "", BOX_KEYS.customerId),
+        $.setdata(config.shopCode || "", BOX_KEYS.shopCode)
+    ];
+    return results.every(Boolean);
 }
 
 // 配置信息
